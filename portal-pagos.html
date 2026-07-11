@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Pagos - Movement House</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
+    
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js" defer></script>
+    
+    <style>
+        :root {
+            --bg-base: #000000; --bg-surface: #0a0a0a; --bg-card: #111111;
+            --accent: #FF5E00; --accent-hover: #e05300; --accent-glow: rgba(255, 94, 0, 0.25);
+            --text-main: #ffffff; --text-muted: #888888;
+            --success: #10b981; --danger: #ef4444; --whatsapp: #25D366;
+            --border-light: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Inter', sans-serif; min-height: 100vh; padding-bottom: 80px; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 1.5rem; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border-light); }
+        .brand-logo { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.4rem; font-style: italic; display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-logo .orange { color: var(--accent); } .brand-logo .white { color: var(--text-main); }
+        
+        .app-container { padding: 1.5rem; max-width: 600px; margin: 0 auto; }
+
+        .page-header { margin-bottom: 1.5rem; }
+        .page-header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-family: 'Oswald', sans-serif; font-size: 0.8rem; letter-spacing: 1px; background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .receipt-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+        .receipt-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .price-label { color: var(--text-muted); font-size: 0.9rem; }
+        .price-value { font-family: 'Oswald', sans-serif; font-size: 1.2rem; }
+        
+        .bcv-row { background: rgba(255, 255, 255, 0.03); padding: 0.8rem; border-radius: 8px; border: 1px dashed var(--border-light); margin-bottom: 1.5rem; }
+        .bcv-row .price-value { color: var(--success); font-size: 1.1rem; }
+
+        .total-row { border-top: 1px solid var(--border-light); padding-top: 1rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        .total-row .price-label { font-size: 1rem; font-weight: 600; color: white; font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+        .total-row .price-value { font-size: 2.2rem; color: var(--accent); line-height: 1; }
+        
+        .skeleton { background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%); background-size: 200% 100%; animation: loading 1.5s infinite; border-radius: 4px; color: transparent !important; user-select: none; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        .payment-methods { margin-bottom: 2rem; }
+        .payment-methods h3 { font-size: 1rem; color: var(--text-muted); margin-bottom: 1rem; }
+        .bank-details { background: #141414; border: 1px solid var(--border-light); border-radius: 8px; padding: 1.2rem; margin-bottom: 1rem; }
+        .bank-line { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .bank-line:last-child { margin-bottom: 0; }
+        .bank-line span:first-child { color: var(--text-muted); }
+        .bank-line span:last-child { font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; color: white; }
+
+        .btn-whatsapp { display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; padding: 1rem; border-radius: 8px; font-weight: 600; text-decoration: none; font-size: 1rem; transition: 0.3s; text-transform: uppercase; font-family: 'Oswald', sans-serif; letter-spacing: 1px; border: none; cursor: pointer; background: var(--whatsapp); color: white; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.2); }
+        .btn-whatsapp:hover { background: #1ebd5a; transform: translateY(-2px); }
+        .btn-whatsapp svg { width: 22px; height: 22px; fill: currentColor; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg-surface); border-top: 1px solid var(--border-light); display: flex; justify-content: space-around; padding: 0.8rem 0; padding-bottom: calc(0.8rem + env(safe-area-inset-bottom)); z-index: 50; }
+        .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.3s; }
+        .nav-item svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .nav-item.active { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="brand-logo">
+            <span><span class="orange">M</span><span class="white">OVEMENT</span></span>
+        </div>
+        <div style="font-family: 'Oswald', sans-serif; color: var(--text-muted); letter-spacing: 1px;">PAGOS</div>
+    </header>
+
+    <main class="app-container">
+        <div class="page-header">
+            <h1>Mensualidad</h1>
+            <div class="status-badge">PAGO VENCIDO</div>
+        </div>
+
+        <section class="receipt-card">
+            <div class="price-row">
+                <span class="price-label">Mensualidad Base</span>
+                <span class="price-value">$30.00</span>
+            </div>
+            <div class="price-row bcv-row">
+                <span class="price-label">Tasa Oficial BCV</span>
+                <span class="price-value skeleton" id="tasa-bcv">Cargando...</span>
+            </div>
+            <div class="total-row">
+                <span class="price-label">Total a transferir</span>
+                <div style="text-align: right;">
+                    <span class="price-value skeleton" id="total-ves">00.00</span>
+                    <span style="font-size: 0.9rem; color: var(--text-muted); display:block;">Bolívares (VES)</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="payment-methods">
+            <h3>DATOS PARA PAGO MÓVIL</h3>
+            <div class="bank-details">
+                <div class="bank-line"><span>Banco:</span> <span>Banesco (0134)</span></div>
+                <div class="bank-line"><span>Teléfono:</span> <span>0412-0000000</span></div>
+                <div class="bank-line"><span>Cédula/RIF:</span> <span>J-00000000-0</span></div>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem;">
+                *Zelle o Efectivo: Pagar directamente en la recepción del gimnasio.
+            </p>
+
+            <a href="#" id="btn-reportar" class="btn-whatsapp" style="pointer-events: none; opacity: 0.5;">
+                <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                Reportar Pago
+            </a>
+        </section>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg> Inicio
+        </a>
+        <a href="portal-pagos.html" class="nav-item active">
+            <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg> Pagos
+        </a>
+    </nav>
+</body>
+</html>

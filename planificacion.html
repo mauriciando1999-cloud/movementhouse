@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Planificaciones | Movement House</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root {
+            --bg-base: #050505; --bg-surface: #0a0a0a; --bg-card: #121212;
+            --accent: #FF5E00; --accent-hover: #e05300;
+            --text-main: #ffffff; --text-muted: #94a3b8;
+            --border-color: #2d2d2d;
+            --success: #10b981; --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.6; }
+
+        .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+        
+        /* Header */
+        .header-section { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; }
+        h1 { font-family: 'Oswald', sans-serif; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .breadcrumb { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; display: block; text-decoration: none; transition: 0.3s;}
+        .breadcrumb:hover { color: var(--accent); }
+
+        .btn-new { background: var(--accent); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-family: 'Oswald', sans-serif; font-size: 0.9rem; cursor: pointer; transition: 0.3s; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
+        .btn-new:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+        /* Tabla */
+        .data-table { width: 100%; border-collapse: separate; border-spacing: 0 0.8rem; margin-top: 1rem; }
+        .data-table th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; padding: 1rem; border-bottom: 1px solid var(--border-color); text-align: left; }
+        .data-table td { background: var(--bg-card); padding: 1.2rem 1.5rem; vertical-align: middle; }
+        .data-table tr td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; font-family: 'Oswald', sans-serif; font-size: 1.1rem; }
+        .data-table tr td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; }
+        .badge-global { background: rgba(255, 94, 0, 0.1); border: 1px solid rgba(255, 94, 0, 0.3); color: var(--accent); }
+        .badge-user { background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; }
+
+        /* Acciones */
+        .action-btns { display: flex; gap: 8px; justify-content: flex-end; }
+        .btn-action { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 1rem; text-decoration: none; }
+        .btn-action:hover { background: rgba(255,255,255,0.05); color: white; border-color: white; }
+        .btn-action.edit:hover { color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .btn-action.reassign:hover { color: #3b82f6; border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .btn-action.delete:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+
+        /* Modal */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--bg-card); padding: 3rem; border-radius: 16px; border: 1px solid var(--border-color); width: 100%; max-width: 450px; }
+        
+        select { width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: white; padding: 1rem; border-radius: 8px; margin-top: 0.5rem; margin-bottom: 2rem; outline: none; font-family: 'Inter', sans-serif; font-size: 1rem;}
+        select:focus { border-color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="page-wrapper">
+        <header class="header-section">
+    <div>
+        <a href="index-admin.html" class="breadcrumb">← VOLVER AL PANEL ADMINISTRATIVO</a>
+        <h1>Gestor de Planificaciones</h1>
+    </div>
+    <!-- Botón para crear nueva rutina (Apunta a rutina.html) -->
+    <a href="rutina.html" class="btn-new">+ NUEVA PLANIFICACIÓN</a>
+</header>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre del Bloque</th>
+                    <th>Asignado A</th>
+                    <th>Inicio / Fecha</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="planificaciones-tbody">
+                <tr><td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-muted);">Sincronizando con la base de datos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- MODAL PARA REASIGNAR -->
+    <div id="modalReasignar" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 0.5rem;">Reasignar Rutina</h2>
+            <p id="reasignar-nombre" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;"></p>
+            
+            <form onsubmit="guardarReasignacion(event)">
+                <label style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Seleccionar Nuevo Atleta</label>
+                <select id="select-atleta" required>
+                    <option value="global">Planilla Global (Todos)</option>
+                    <!-- Las opciones se llenan desde Supabase -->
+                </select>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" onclick="cerrarModal()" class="btn-new" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); width: 50%;">CANCELAR</button>
+                    <button type="submit" id="btn-save-reassign" class="btn-new" style="width: 50%; background: var(--success);">APLICAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MOTOR LÓGICO DE LA VISTA -->
+    <script>
+        let dbClient = null;
+        let perfilesGlobal = [];
+        let planificacionActualId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof window.MH_CONFIG !== 'undefined') {
+                dbClient = window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
+                await cargarPerfiles();
+                await cargarListaPlanificaciones();
+            } else {
+                alert("Error crítico: Falta el archivo config.js");
+            }
+        });
+
+        // 1. Obtener la lista de perfiles (Para saber los nombres reales en lugar de los UUIDs)
+        async function cargarPerfiles() {
+            try {
+                const { data } = await dbClient.from('profiles').select('id, name').order('name');
+                if (data) {
+                    perfilesGlobal = data;
+                    const select = document.getElementById('select-atleta');
+                    data.forEach(p => {
+                        select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                    });
+                }
+            } catch (error) { console.error("Error cargando perfiles:", error); }
+        }
+
+        // 2. Renderizar la tabla principal
+        async function cargarListaPlanificaciones() {
+            const tbody = document.getElementById('planificaciones-tbody');
+            try {
+                // Traemos las rutinas ordenadas por fecha de creación descendente
+                const { data, error } = await dbClient.from('routines')
+                    .select('id, name, assigned_to, created_at, start_date')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 2rem;">No hay planificaciones creadas en el sistema.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                data.forEach(rutina => {
+                    const esGlobal = rutina.assigned_to === 'global';
+                    let nombreAsignado = 'Planilla Global';
+                    
+                    if (!esGlobal) {
+                        const perfil = perfilesGlobal.find(p => p.id === rutina.assigned_to);
+                        nombreAsignado = perfil ? perfil.name : 'Atleta Eliminado';
+                    }
+
+                    const badgeClass = esGlobal ? 'badge-global' : 'badge-user';
+                    
+                    // Mostrar fecha de inicio si existe, si no, fecha de creación
+                    let fechaMostrar = rutina.start_date 
+                        ? `<span style="color:var(--accent);">Inicio: ${rutina.start_date}</span>` 
+                        : `Creada: ${new Date(rutina.created_at).toLocaleDateString('es-ES')}`;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${rutina.name}</td>
+                            <td><span class="badge ${badgeClass}">${nombreAsignado}</span></td>
+                            <td style="color: var(--text-muted); font-size: 0.9rem;">${fechaMostrar}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-action reassign" title="Reasignar a otro Atleta" onclick="abrirModalReasignar('${rutina.id}', '${rutina.name.replace(/'/g, "\\'")}', '${rutina.assigned_to}')">🔄</button>
+                                    <a href="rutinas.html?edit=${rutina.id}" class="btn-action edit" title="Modificar Rutina">✎</a>
+                                    <button class="btn-action delete" title="Eliminar Rutina" onclick="eliminarPlanificacion('${rutina.id}', '${rutina.name.replace(/'/g, "\\'")}')">×</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--danger);">Ocurrió un error cargando los datos.</td></tr>';
+            }
+        }
+
+        // 3. Lógica del Modal de Reasignación
+        window.abrirModalReasignar = function(id, nombre, asignadoActualmente) {
+            planificacionActualId = id;
+            document.getElementById('reasignar-nombre').innerText = `Bloque Seleccionado: ${nombre}`;
+            document.getElementById('select-atleta').value = asignadoActualmente;
+            document.getElementById('modalReasignar').classList.add('active');
+        }
+
+        window.cerrarModal = function() {
+            document.getElementById('modalReasignar').classList.remove('active');
+            planificacionActualId = null;
+        }
+
+        window.guardarReasignacion = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-reassign');
+            const nuevoAtletaId = document.getElementById('select-atleta').value;
+            
+            btn.innerText = 'GUARDANDO...'; 
+            btn.disabled = true;
+
+            try {
+                // Actualiza el campo assigned_to en Supabase
+                const { error } = await dbClient.from('routines')
+                    .update({ assigned_to: nuevoAtletaId })
+                    .eq('id', planificacionActualId);
+                    
+                if (error) throw error;
+                
+                cerrarModal();
+                await cargarListaPlanificaciones(); // Refresca la tabla visualmente
+            } catch (error) {
+                alert("Hubo un error al intentar reasignar la rutina.");
+            } finally {
+                btn.innerText = 'APLICAR'; 
+                btn.disabled = false;
+            }
+        }
+
+        // 4. Lógica de Eliminación
+        window.eliminarPlanificacion = async function(id, nombre) {
+            if (!confirm(`¿Estás seguro de eliminar permanentemente la planificación "${nombre}"?`)) return;
+            
+            try {
+                const { error } = await dbClient.from('routines').delete().eq('id', id);
+                if (error) throw error;
+                await cargarListaPlanificaciones();
+            } catch (error) {
+                alert("Error eliminando la planificación.");
+            }
+        }
+    </script>
+</body>
+</html>
