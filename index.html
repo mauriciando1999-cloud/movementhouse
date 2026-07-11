@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Movement House</title>
-    
+    <!-- Configuración PWA Admin -->
+    <meta name="theme-color" content="#FF5E00">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest-admin.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     
     <!-- Configuración Global y SDK -->
@@ -406,7 +411,30 @@
             } else {
                 bootSystem();
             }
+        }// LÓGICA PWA PARA EL ADMIN (Instalación)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Si quieres puedes crear un botón en tu panel que diga "Instalar App Admin"
+            // y que ejecute la función instalarAppAdmin()
+            console.log("App Admin lista para instalarse");
+        });
+
+        async function instalarAppAdmin() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+            }
+        }
+        
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Falló:', err));
+            });
         }
     </script>
+    
 </body>
 </html>
