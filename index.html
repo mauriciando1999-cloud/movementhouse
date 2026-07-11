@@ -14,11 +14,8 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     
-    <!-- Configuración Global y SDK -->
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Motor Central -->
     <script src="app.js" defer></script>
 
     <style>
@@ -35,55 +32,42 @@
         body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Inter', sans-serif; min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         h1, h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* PANTALLA DE CARGA (VIDEO) */
-        #splash-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #000000; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 9999;
-        }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
         #splash-screen video { width: 100%; max-width: 600px; outline: none; }
         #btn-skip { margin-top: 2rem; background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 10px 24px; border-radius: 8px; cursor: pointer; font-family: 'Oswald', sans-serif; text-transform: uppercase; transition: 0.3s; }
-        #btn-skip:hover { color: white; border-color: white; }
 
-        /* INTERFAZ PRINCIPAL */
         #main-app { display: none; opacity: 0; transition: opacity 0.5s ease; }
-        
         .glass-panel { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
 
-        .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border-light); background: var(--bg-surface); margin-bottom: 2rem; position: sticky; top: 0; z-index: 50;}
+        .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border-light); background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); margin-bottom: 2rem; position: sticky; top: 0; z-index: 50;}
         .brand-logo { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.5rem; font-style: italic; display: flex; align-items: center; gap: 10px; }
         .brand-logo .orange { color: var(--accent); } .brand-logo .white { color: var(--text-main); }
-        .badge-admin { background: var(--danger); color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-family: 'Inter', sans-serif; font-style: normal; }
+        .badge-admin { background: var(--danger); color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-family: 'Inter', sans-serif; }
 
         .admin-container { max-width: 1200px; margin: 0 auto; padding: 0 2rem 3rem 2rem; display: grid; gap: 2rem; }
 
         .admin-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-        .kpi-card { padding: 1.5rem; position: relative; overflow: hidden; transition: 0.3s; border-radius: 12px; }
-        .kpi-card:hover { border-color: rgba(255, 94, 0, 0.4); box-shadow: 0 0 20px var(--accent-glow); }
+        .kpi-card { padding: 1.5rem; position: relative; overflow: hidden; border-radius: 12px; }
         .kpi-card h3 { font-size: 1rem; color: var(--text-muted); margin-bottom: 0.5rem; }
         .kpi-value { font-size: 3.5rem; font-family: 'Oswald', sans-serif; line-height: 1; }
 
         .admin-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
         .btn { padding: 0.8rem 1.5rem; border-radius: 6px; font-weight: 600; font-size: 0.95rem; text-decoration: none; color: white; border: none; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
         .btn-primary { background: var(--accent); }
-        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 4px 15px var(--accent-glow); }
         .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); }
-        .btn-outline:hover { background: rgba(255,255,255,0.05); border-color: white; }
 
         .admin-table-section { padding: 1.5rem; }
         .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .table-header h2 { font-size: 1.4rem; margin: 0; }
-        .view-all-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: 0.3s; font-family: 'Inter', sans-serif;}
-        .view-all-link:hover { color: var(--accent); }
+        .view-all-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-family: 'Inter', sans-serif;}
         
         .table-responsive { overflow-x: auto; min-height: 200px; }
         .admin-table { width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif; }
         .admin-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid var(--border-light); background: rgba(0,0,0,0.3); }
         .admin-table td { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
-        .admin-table tr:hover { background: rgba(255, 255, 255, 0.02); }
 
         /* Estilos inyectados por app.js */
-        .user-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--input-bg); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; margin-right: 15px; font-family: 'Oswald', sans-serif; text-transform: uppercase;}
+        .user-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--input-bg); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; margin-right: 15px; font-family: 'Oswald', sans-serif;}
         .user-col { display: flex; align-items: center; }
         .user-info strong { display: block; font-size: 1rem; color: white; margin-bottom: 2px;}
         .user-info small { color: var(--text-muted); font-size: 0.85rem;}
@@ -93,10 +77,7 @@
         .badge-orange { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(255, 94, 0, 0.2); }
 
         .action-btns { display: flex; gap: 8px; }
-        .btn-icon { background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
-        .btn-icon:hover { background: rgba(255,255,255,0.05); color: white; border-color: white;}
-        .btn-icon.pay:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-glow); }
-        .btn-icon.delete:hover { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
+        .btn-icon { background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 
         /* MODAL */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s; padding: 1rem;}
@@ -104,32 +85,63 @@
         .modal-content { background: var(--bg-card); padding: 2.5rem; width: 100%; max-width: 550px; border: 1px solid var(--border-light); border-radius: 12px; position: relative; transform: translateY(20px); transition: 0.3s; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         .modal.active .modal-content { transform: translateY(0); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .btn-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 2rem; line-height: 1; transition: 0.3s;}
-        .btn-close:hover { color: var(--accent); }
+        .btn-close { background: none; border: none; color: var(--text-muted); font-size: 2rem; line-height: 1; }
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.85rem; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
-        .form-group input, .form-group select { width: 100%; padding: 0.8rem; border-radius: 6px; background: var(--input-bg); border: 1px solid var(--border-light); color: white; font-family: 'Inter', sans-serif; transition: 0.3s; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+        .form-group input, .form-group select { width: 100%; padding: 0.8rem; border-radius: 6px; background: var(--input-bg); border: 1px solid var(--border-light); color: white; font-family: 'Inter', sans-serif; }
 
         .skeleton { background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%); background-size: 200% 100%; animation: loading 1.5s infinite; color: transparent !important; border-radius: 4px; user-select: none; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* BANNER DE INSTALACIÓN ADMIN */
-        #install-banner { display: none; background: var(--accent); color: white; padding: 1.2rem; text-align: center; font-weight: 600; font-size: 0.95rem; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; cursor: pointer; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Oswald', sans-serif;}
+        #install-banner { display: none; background: var(--accent); color: white; padding: 1.2rem; text-align: center; font-weight: 600; font-size: 0.95rem; position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Oswald', sans-serif;}
+
+        /* ==========================================================
+           COMPONENTE: MENÚ RADIAL MÓVIL
+           ========================================================== */
+        .radial-menu-wrapper { display: none; position: fixed; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 1000; width: 70px; height: 70px; }
+        
+        .radial-center { width: 70px; height: 70px; background: var(--bg-card); border: 2px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-style: italic; color: white; box-shadow: 0 0 0 0 rgba(255, 94, 0, 0.4); position: relative; z-index: 10; user-select: none; -webkit-user-select: none; touch-action: none; animation: pulseRadial 2s infinite; }
+        @keyframes pulseRadial { 0% { box-shadow: 0 0 0 0 rgba(255, 94, 0, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 94, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 94, 0, 0); } }
+        
+        .radial-label { position: absolute; top: -130px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); border: 1px solid var(--accent); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; font-family: 'Oswald', sans-serif; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .radial-menu-wrapper.active .radial-label { opacity: 1; }
+
+        .radial-bubble { position: absolute; top: 10px; left: 10px; width: 50px; height: 50px; background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; opacity: 0; z-index: 1; pointer-events: none; color: white; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: translate(0, 0) scale(0); }
+        .radial-menu-wrapper.active .radial-bubble { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1); }
+        .radial-menu-wrapper.active .radial-bubble.hovered { transform: translate(var(--tx), var(--ty)) scale(1.3); background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); z-index: 5; }
+
+        /* Posiciones matemáticas del arco (Trigonometría) */
+        #rb-0 { --tx: -90px; --ty: -20px; } /* Izquierda */
+        #rb-1 { --tx: -50px; --ty: -85px; } /* Arriba Izquierda */
+        #rb-2 { --tx: 50px; --ty: -85px; }  /* Arriba Derecha */
+        #rb-3 { --tx: 90px; --ty: -20px; }  /* Derecha */
 
         /* OPTIMIZACIÓN EXTREMA PARA TELÉFONOS */
         @media (max-width: 768px) {
-            .admin-header { padding: 1rem; flex-direction: column; gap: 15px; align-items: flex-start; }
-            .admin-container { padding: 0 1rem 6rem 1rem; } /* Margen inferior para que el banner no tape el contenido */
-            .admin-actions { flex-direction: column; gap: 10px; }
-            .admin-actions .btn { width: 100%; justify-content: center; padding: 1rem; }
-            .admin-kpis { grid-template-columns: 1fr; }
-            .kpi-card { padding: 1.2rem; }
-            .kpi-value { font-size: 2.8rem; }
-            .table-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .modal-content { padding: 1.5rem; }
-        }
+            .admin-header { padding: 1rem; margin-bottom: 1.5rem; }
+            .brand-logo { font-size: 1.2rem; }
+            .admin-header .user-badge-text { display: none; }
+            .admin-container { padding: 0 1rem 8rem 1rem; gap: 1.5rem; }
+            .admin-kpis { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .kpi-card { padding: 1.2rem; border-radius: 10px; }
+            .kpi-card:nth-child(1) { grid-column: span 2; }
+            .kpi-card h3 { font-size: 0.85rem; }
+            .kpi-value { font-size: 2.5rem; }
+            
+            /* Ocultamos los botones aburridos y activamos el Menú Radial Táctil */
+            .admin-actions { display: none; }
+            .radial-menu-wrapper { display: block; }
 
+            .admin-table-section { padding: 1rem; border-radius: 12px; }
+            .table-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 1rem; }
+            .table-header h2 { font-size: 1.2rem; }
+            .table-responsive { border-radius: 8px; border: 1px solid var(--border-light); padding-bottom: 0.5rem; }
+            .admin-table th { padding: 0.8rem 1rem; font-size: 0.75rem; }
+            .admin-table td { padding: 1rem; font-size: 0.9rem; white-space: nowrap; } 
+            
+            .modal { align-items: flex-end; padding: 0; background: rgba(0, 0, 0, 0.9); }
+            .modal-content { border-radius: 20px 20px 0 0; padding: 1.5rem; border: none; border-top: 1px solid var(--border-light); transform: translateY(100%); }
+        }
     </style>
 </head>
 <body>
@@ -146,37 +158,37 @@
     <div id="main-app">
         <header class="admin-header">
             <div class="brand-logo">
-                <span><span class="orange">M</span><span class="white">OVEMENT</span> <span class="orange">H</span><span class="white">OUSE</span></span>
+                <span><span class="orange">M</span><span class="white">OVEMENT</span></span>
                 <span class="badge-admin">ADMIN</span>
             </div>
-            <div style="display: flex; gap: 15px; align-items: center; font-family: 'Inter', sans-serif;">
-                <span style="color: var(--text-muted); font-size: 0.9rem;">Panel Central</span>
-                <div style="width: 35px; height: 35px; border-radius: 50%; background: var(--text-main); color: black; display: flex; align-items: center; justify-content: center; font-weight: bold;">ML</div>
+            <div style="display: flex; gap: 10px; align-items: center; font-family: 'Inter', sans-serif;">
+                <span class="user-badge-text" style="color: var(--text-muted); font-size: 0.9rem;">Panel Central</span>
+                <div style="width: 35px; height: 35px; border-radius: 50%; background: var(--text-main); color: black; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem;">ML</div>
             </div>
         </header>
 
         <main class="admin-container">
-            <!-- KPIs DINÁMICOS -->
+            <!-- KPIs -->
             <section class="admin-kpis">
                 <div class="kpi-card glass-panel">
                     <h3>Total Atletas</h3>
                     <p class="kpi-value skeleton" id="kpi-total">000</p>
                 </div>
                 <div class="kpi-card glass-panel">
-                    <h3>Activos al día</h3>
-                    <p class="kpi-value skeleton" id="kpi-active" style="color: var(--success);">000</p>
+                    <h3>Activos</h3>
+                    <p class="kpi-value skeleton" id="kpi-active" style="color: var(--success);">00</p>
                 </div>
                 <div class="kpi-card glass-panel">
-                    <h3>Pagos Pendientes</h3>
-                    <p class="kpi-value skeleton" id="kpi-pending" style="color: var(--accent);">000</p>
+                    <h3>Pendientes</h3>
+                    <p class="kpi-value skeleton" id="kpi-pending" style="color: var(--accent);">00</p>
                 </div>
             </section>
 
-            <!-- ACCIONES RÁPIDAS -->
+            <!-- ACCIONES (Solo visibles en Escritorio) -->
             <section class="admin-actions">
-                <a href="usuarios.html" class="btn btn-outline">👥 Directorio Atletas</a>
-                <a href="planificacion.html" class="btn btn-outline">📅 Gestor Planificaciones</a>
-                <button onclick="abrirModalEnlace()" class="btn btn-outline">🔗 Compartir Acceso</button>
+                <a href="usuarios.html" class="btn btn-outline">👥 Directorio</a>
+                <a href="planificacion.html" class="btn btn-outline">📅 Planificar</a>
+                <button onclick="abrirModalEnlace()" class="btn btn-outline">🔗 Enlaces</button>
                 <a href="rutinas.html" class="btn btn-primary">⚡ Nueva Rutina</a>
             </section>
 
@@ -184,7 +196,7 @@
             <section class="admin-table-section glass-panel">
                 <div class="table-header">
                     <h2>CONTROL DE COBRANZAS</h2>
-                    <a href="usuarios.html" class="view-all-link">Gestionar directorio →</a>
+                    <a href="usuarios.html" class="view-all-link">Gestionar todo →</a>
                 </div>
                 <div class="table-responsive">
                     <table class="admin-table">
@@ -204,6 +216,18 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <!-- MENÚ RADIAL MÓVIL (Sustituye la botonera en teléfonos) -->
+    <div class="radial-menu-wrapper" id="radial-menu">
+        <div class="radial-label" id="radial-label">Toca y desliza</div>
+        <div class="radial-bubble" id="rb-0">👥</div>
+        <div class="radial-bubble" id="rb-1">📅</div>
+        <div class="radial-bubble" id="rb-2">🔗</div>
+        <div class="radial-bubble" id="rb-3">⚡</div>
+        <div class="radial-center" id="radial-center-btn">
+            <span class="orange">M</span><span class="white">H</span>
+        </div>
     </div>
 
     <!-- MODAL REGISTRAR PAGO -->
@@ -242,45 +266,37 @@
                 <button class="btn-close" onclick="cerrarModalEnlace()">×</button>
             </div>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
-                Genera el enlace único para que el atleta pueda ver sus rutinas y llevar su historial en su teléfono.
+                Genera el enlace único para que el atleta pueda ver sus rutinas en su teléfono.
             </p>
-            
             <div class="form-group">
                 <label>SELECCIONAR ATLETA</label>
                 <select id="select-enlace-atleta" onchange="generarEnlace()">
                     <option value="">Cargando catálogo...</option>
                 </select>
             </div>
-            
             <div class="form-group">
                 <label>ENLACE GENERADO</label>
                 <input type="text" id="input-enlace-generado" readonly placeholder="Selecciona un atleta primero..." style="color: var(--accent); background: rgba(255,94,0,0.05); cursor: pointer;" onclick="this.select()">
             </div>
-            
             <div style="margin-top: 2rem; display: flex; gap: 10px;">
-                <button type="button" class="btn btn-outline" style="width: 50%; justify-content: center;" onclick="copiarEnlace()">📋 Copiar Link</button>
-                <button type="button" class="btn btn-primary" style="width: 50%; justify-content: center; background: var(--whatsapp);" onclick="enviarEnlaceWA()">💬 Enviar al WA</button>
+                <button type="button" class="btn btn-outline" style="width: 50%; justify-content: center;" onclick="copiarEnlace()">📋 Copiar</button>
+                <button type="button" class="btn btn-primary" style="width: 50%; justify-content: center; background: var(--whatsapp);" onclick="enviarEnlaceWA()">💬 WhatsApp</button>
             </div>
         </div>
     </div>
 
-    <!-- BANNER DE INSTALACIÓN ADMIN -->
-    <div id="install-banner" onclick="instalarAppAdmin()">📲 Instalar Panel de Control en el Teléfono</div>
+    <div id="install-banner" onclick="instalarAppAdmin()">📲 Instalar Panel de Control</div>
 
-    <!-- SCRIPT DE INICIO SEGURO, MÉTRICAS Y HERRAMIENTA DE ENLACES -->
+    <!-- SCRIPT CENTRAL -->
     <script>
         const splashScreen = document.getElementById('splash-screen');
         const mainApp = document.getElementById('main-app');
         const video = document.getElementById('intro-video');
         let bootInitiated = false;
-        
-        // Variable global para guardar los perfiles en caché para WhatsApp
         let perfilesGlobales = [];
 
-        // Motor de Métricas
         async function cargarMetricas() {
             if (typeof window.MH_CONFIG === 'undefined') return;
-            
             const db = window.dbClient || window._sb || window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
 
             try {
@@ -296,17 +312,12 @@
 
                     data.forEach(atleta => {
                         const estadoText = String(atleta.estado || atleta.status || '').toLowerCase().trim();
-                        
-                        if (estadoText === 'activo' || estadoText === 'solvente' || estadoText === 'al día') {
-                            activos++;
-                        } else if (estadoText === 'vencido' || estadoText === 'deudor' || estadoText === 'inactivo') {
-                            vencidos++;
-                        } else if (atleta.fecha_corte) {
+                        if (estadoText === 'activo' || estadoText === 'solvente' || estadoText === 'al día') { activos++; } 
+                        else if (estadoText === 'vencido' || estadoText === 'deudor' || estadoText === 'inactivo') { vencidos++; } 
+                        else if (atleta.fecha_corte) {
                             const fechaCorte = new Date(atleta.fecha_corte);
                             if (fechaCorte >= hoy) { activos++; } else { vencidos++; }
-                        } else {
-                            activos++; 
-                        }
+                        } else { activos++; }
                     });
 
                     const elTotal = document.getElementById('kpi-total');
@@ -317,122 +328,184 @@
                     if(elActivos) { elActivos.innerText = activos; elActivos.classList.remove('skeleton'); }
                     if(elPendientes) { elPendientes.innerText = vencidos; elPendientes.classList.remove('skeleton'); }
                 }
-            } catch (error) {
-                console.error("Error al cargar las métricas:", error);
-            }
+            } catch (error) { console.error("Error al cargar métricas:", error); }
         }
 
         function abrirModalEnlace() {
             document.getElementById('modalEnlace').classList.add('active');
             const select = document.getElementById('select-enlace-atleta');
-            
-            if (perfilesGlobales.length === 0) {
-                select.innerHTML = '<option value="">No hay atletas registrados</option>';
-                return;
-            }
-
+            if (perfilesGlobales.length === 0) { select.innerHTML = '<option value="">No hay atletas registrados</option>'; return; }
             select.innerHTML = '<option value="">-- Elige un atleta --</option>';
             perfilesGlobales.sort((a, b) => a.name.localeCompare(b.name)).forEach(p => {
                 select.innerHTML += `<option value="${p.id}">${p.name}</option>`;
             });
         }
-
         function cerrarModalEnlace() {
             document.getElementById('modalEnlace').classList.remove('active');
             document.getElementById('input-enlace-generado').value = '';
             document.getElementById('select-enlace-atleta').value = '';
         }
-
         function generarEnlace() {
             const id = document.getElementById('select-enlace-atleta').value;
             const input = document.getElementById('input-enlace-generado');
-            if (!id) {
-                input.value = '';
-                return;
-            }
+            if (!id) { input.value = ''; return; }
             const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
             input.value = `${baseUrl}/index-user.html?id=${id}`;
         }
-
         function copiarEnlace() {
             const input = document.getElementById('input-enlace-generado');
-            if (!input.value) return alert('Por favor, selecciona un atleta de la lista.');
-            input.select();
-            document.execCommand('copy');
-            
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '✅ ¡Copiado!';
-            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+            if (!input.value) return alert('Selecciona un atleta.');
+            input.select(); document.execCommand('copy');
+            const btn = event.currentTarget; const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ ¡Copiado!'; setTimeout(() => { btn.innerHTML = originalText; }, 2000);
         }
-
         function enviarEnlaceWA() {
             const id = document.getElementById('select-enlace-atleta').value;
             const link = document.getElementById('input-enlace-generado').value;
-            if (!id || !link) return alert('Por favor, selecciona un atleta.');
-            
+            if (!id || !link) return alert('Selecciona un atleta.');
             const atleta = perfilesGlobales.find(p => p.id === id);
             let phone = atleta.phone || atleta.telefono || '';
-            
             phone = phone.replace(/\D/g, '');
-            if (phone.startsWith('0')) {
-                phone = '58' + phone.substring(1); 
-            }
-
+            if (phone.startsWith('0')) { phone = '58' + phone.substring(1); }
             const firstName = atleta.name.split(' ')[0];
-            const mensaje = `¡Hola ${firstName}! 💪\n\nAquí tienes el enlace de acceso directo a tu panel de Movement House. Úsalo para ver tus rutinas, anotar tus pesos y llevar tu historial de marcas:\n\n🔗 ${link}\n\nGuarda este enlace en tus favoritos.`;
-            
-            if (phone && phone.length >= 10) {
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`, '_blank');
-            } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
-            }
+            const mensaje = `¡Hola ${firstName}! 💪\n\nAquí tienes el enlace de acceso directo a tu panel de Movement House:\n\n🔗 ${link}\n\nGuarda este enlace.`;
+            if (phone && phone.length >= 10) { window.open(`https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`, '_blank'); } 
+            else { window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank'); }
         }
 
+        // ==========================================
+        // LÓGICA DEL MENÚ RADIAL TÁCTIL (INTELIGENTE)
+        // ==========================================
+        const radialMenu = document.getElementById('radial-menu');
+        const radialBtn = document.getElementById('radial-center-btn');
+        const radialLabel = document.getElementById('radial-label');
+        
+        // Mapeo matemático de burbujas y acciones
+        const configBurbujas = [
+            { el: document.getElementById('rb-0'), angle: -160, action: 'usuarios.html', name: '👥 Directorio Atletas' },
+            { el: document.getElementById('rb-1'), angle: -115, action: 'planificacion.html', name: '📅 Gestor Planes' },
+            { el: document.getElementById('rb-2'), angle: -65, action: 'share', name: '🔗 Compartir Enlace' },
+            { el: document.getElementById('rb-3'), angle: -20, action: 'rutinas.html', name: '⚡ Crear Rutina' }
+        ];
+
+        let menuActive = false;
+        let touchStarted = false;
+        let centerX, centerY;
+        let selectedBubble = null;
+
+        function openRadial() {
+            menuActive = true;
+            radialMenu.classList.add('active');
+            radialLabel.innerText = "Desliza el dedo";
+            if(navigator.vibrate) navigator.vibrate(50); // Vibración háptica
+            
+            // Calculamos el centro del botón para la matemática vectorial
+            const rect = radialBtn.getBoundingClientRect();
+            centerX = rect.left + rect.width / 2;
+            centerY = rect.top + rect.height / 2;
+        }
+
+        function closeRadial() {
+            menuActive = false;
+            radialMenu.classList.remove('active');
+            configBurbujas.forEach(b => b.el.classList.remove('hovered'));
+            
+            // Si el usuario soltó el dedo sobre una opción, ejecutamos la acción
+            if (selectedBubble) {
+                if(navigator.vibrate) navigator.vibrate(50);
+                if (selectedBubble.action === 'share') {
+                    abrirModalEnlace();
+                } else {
+                    window.location.href = selectedBubble.action;
+                }
+            }
+            selectedBubble = null;
+        }
+
+        // 1. Al tocar el botón central
+        radialBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); 
+            touchStarted = true;
+            openRadial(); 
+        }, { passive: false });
+
+        // 2. Al arrastrar el dedo por la pantalla
+        document.addEventListener('touchmove', (e) => {
+            if (!menuActive) return;
+            e.preventDefault(); // Evita que la pantalla haga scroll mientras arrastras
+            
+            const touch = e.touches[0];
+            const dx = touch.clientX - centerX;
+            const dy = touch.clientY - centerY;
+            const distancia = Math.sqrt(dx*dx + dy*dy);
+            
+            selectedBubble = null;
+            configBurbujas.forEach(b => b.el.classList.remove('hovered'));
+            radialLabel.innerText = "Cancelar";
+
+            // Si arrastró el dedo fuera del centro, calculamos el ángulo de inclinación
+            if (distancia > 30) {
+                let anguloDedo = Math.atan2(dy, dx) * (180 / Math.PI);
+                let minimaDiferencia = Infinity;
+                
+                configBurbujas.forEach(b => {
+                    let diff = Math.abs(anguloDedo - b.angle);
+                    if (diff > 180) diff = 360 - diff; 
+                    
+                    // Si el ángulo del dedo coincide con el área de una burbuja (margen de 50 grados)
+                    if (diff < minimaDiferencia && diff < 50) { 
+                        minimaDiferencia = diff;
+                        selectedBubble = b;
+                    }
+                });
+
+                if (selectedBubble) {
+                    selectedBubble.el.classList.add('hovered');
+                    radialLabel.innerText = selectedBubble.name;
+                }
+            }
+        }, { passive: false });
+
+        // 3. Al soltar el dedo
+        document.addEventListener('touchend', (e) => {
+            if (!touchStarted) return;
+            touchStarted = false;
+            closeRadial();
+        });
+
+
+        // ==========================================
+        // ARRANQUE E INSTALACIÓN PWA
+        // ==========================================
         function bootSystem() {
             if (bootInitiated) return;
             bootInitiated = true;
-            
             if (splashScreen) { splashScreen.remove(); }
-            
             mainApp.style.display = 'block';
             setTimeout(() => { mainApp.style.opacity = '1'; }, 50);
-            
             try { sessionStorage.setItem('mh_intro_admin', 'done'); } catch(e) {}
-            
             cargarMetricas();
         }
 
         document.getElementById('btn-skip').addEventListener('click', bootSystem);
-
         let introVisto = false;
         try { introVisto = sessionStorage.getItem('mh_intro_admin') === 'done'; } catch(e) {}
 
-        if (introVisto) {
-            bootSystem();
-        } else {
+        if (introVisto) { bootSystem(); } 
+        else {
             setTimeout(bootSystem, 6000);
-
             if (video) {
                 const playPromise = video.play();
                 if (playPromise !== undefined) {
-                    playPromise.then(() => {
-                        video.onended = bootSystem;
-                    }).catch(error => {
-                        bootSystem();
-                    });
+                    playPromise.then(() => { video.onended = bootSystem; }).catch(error => { bootSystem(); });
                 }
-            } else {
-                bootSystem();
-            }
+            } else { bootSystem(); }
         }
 
-        // LÓGICA PWA PARA EL ADMIN (Instalación Asegurada)
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Aquí encendemos el banner visual
             document.getElementById('install-banner').style.display = 'block';
         });
 
@@ -441,7 +514,6 @@
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    // Ocultar banner si el usuario aceptó la instalación
                     document.getElementById('install-banner').style.display = 'none';
                 }
                 deferredPrompt = null;
