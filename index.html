@@ -56,28 +56,39 @@
         .btn-primary { background: var(--accent); }
         .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); }
 
-        .admin-table-section { padding: 1.5rem; }
+        /* ARREGLO DE LA TABLA Y EL SCROLL HORIZONTAL */
+        .admin-table-section { padding: 1.5rem; min-width: 0; /* Crucial para que no rompa el grid */ }
         .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .table-header h2 { font-size: 1.4rem; margin: 0; }
         .view-all-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-family: 'Inter', sans-serif;}
         
-        .table-responsive { overflow-x: auto; min-height: 200px; }
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+            min-height: 200px; 
+            -webkit-overflow-scrolling: touch; /* Scroll suave en iOS/Móviles */
+        }
+        /* Estilo sutil para la barra de desplazamiento */
+        .table-responsive::-webkit-scrollbar { height: 6px; }
+        .table-responsive::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+        .table-responsive::-webkit-scrollbar-thumb:hover { background: rgba(255, 94, 0, 0.5); }
+
         .admin-table { width: 100%; border-collapse: collapse; text-align: left; font-family: 'Inter', sans-serif; }
-        .admin-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid var(--border-light); background: rgba(0,0,0,0.3); }
-        .admin-table td { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+        .admin-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid var(--border-light); background: rgba(0,0,0,0.3); white-space: nowrap; }
+        .admin-table td { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; white-space: nowrap; }
 
         /* Estilos inyectados por app.js */
-        .user-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--input-bg); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; margin-right: 15px; font-family: 'Oswald', sans-serif;}
-        .user-col { display: flex; align-items: center; }
+        .user-avatar { width: 42px; height: 42px; min-width: 42px; border-radius: 50%; background: var(--input-bg); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; margin-right: 15px; font-family: 'Oswald', sans-serif;}
+        .user-col { display: flex; align-items: center; min-width: 200px;}
         .user-info strong { display: block; font-size: 1rem; color: white; margin-bottom: 2px;}
         .user-info small { color: var(--text-muted); font-size: 0.85rem;}
 
-        .status-badge { padding: 0.35rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-badge { padding: 0.35rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;}
         .badge-green { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
         .badge-orange { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(255, 94, 0, 0.2); }
 
         .action-btns { display: flex; gap: 8px; }
-        .btn-icon { background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); width: 34px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .btn-icon { background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); width: 34px; height: 34px; min-width: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 
         /* MODAL */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s; padding: 1rem;}
@@ -95,9 +106,7 @@
 
         #install-banner { display: none; background: var(--accent); color: white; padding: 1.2rem; text-align: center; font-weight: 600; font-size: 0.95rem; position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Oswald', sans-serif;}
 
-        /* ==========================================================
-           COMPONENTE: MENÚ RADIAL MÓVIL
-           ========================================================== */
+        /* COMPONENTE: MENÚ RADIAL MÓVIL */
         .radial-menu-wrapper { display: none; position: fixed; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 1000; width: 70px; height: 70px; }
         
         .radial-center { width: 70px; height: 70px; background: var(--bg-card); border: 2px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-style: italic; color: white; box-shadow: 0 0 0 0 rgba(255, 94, 0, 0.4); position: relative; z-index: 10; user-select: none; -webkit-user-select: none; touch-action: none; animation: pulseRadial 2s infinite; }
@@ -110,11 +119,10 @@
         .radial-menu-wrapper.active .radial-bubble { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1); }
         .radial-menu-wrapper.active .radial-bubble.hovered { transform: translate(var(--tx), var(--ty)) scale(1.3); background: var(--accent); border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); z-index: 5; }
 
-        /* Posiciones matemáticas del arco (Trigonometría) */
-        #rb-0 { --tx: -90px; --ty: -20px; } /* Izquierda */
-        #rb-1 { --tx: -50px; --ty: -85px; } /* Arriba Izquierda */
-        #rb-2 { --tx: 50px; --ty: -85px; }  /* Arriba Derecha */
-        #rb-3 { --tx: 90px; --ty: -20px; }  /* Derecha */
+        #rb-0 { --tx: -90px; --ty: -20px; } 
+        #rb-1 { --tx: -50px; --ty: -85px; } 
+        #rb-2 { --tx: 50px; --ty: -85px; }  
+        #rb-3 { --tx: 90px; --ty: -20px; }  
 
         /* OPTIMIZACIÓN EXTREMA PARA TELÉFONOS */
         @media (max-width: 768px) {
@@ -128,16 +136,19 @@
             .kpi-card h3 { font-size: 0.85rem; }
             .kpi-value { font-size: 2.5rem; }
             
-            /* Ocultamos los botones aburridos y activamos el Menú Radial Táctil */
             .admin-actions { display: none; }
             .radial-menu-wrapper { display: block; }
 
-            .admin-table-section { padding: 1rem; border-radius: 12px; }
+            /* Ajustes de Tabla para Móviles */
+            .admin-table-section { padding: 1rem; border-radius: 12px; width: 100%; min-width: 0;}
             .table-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 1rem; }
             .table-header h2 { font-size: 1.2rem; }
-            .table-responsive { border-radius: 8px; border: 1px solid var(--border-light); padding-bottom: 0.5rem; }
+            
+            /* El scroll funciona fluido dentro de este contenedor */
+            .table-responsive { border-radius: 8px; border: 1px solid var(--border-light); padding-bottom: 0.5rem; width: 100%; overflow-x: auto; }
+            
             .admin-table th { padding: 0.8rem 1rem; font-size: 0.75rem; }
-            .admin-table td { padding: 1rem; font-size: 0.9rem; white-space: nowrap; } 
+            .admin-table td { padding: 1rem; font-size: 0.9rem; } 
             
             .modal { align-items: flex-end; padding: 0; background: rgba(0, 0, 0, 0.9); }
             .modal-content { border-radius: 20px 20px 0 0; padding: 1.5rem; border: none; border-top: 1px solid var(--border-light); transform: translateY(100%); }
@@ -146,7 +157,6 @@
 </head>
 <body>
 
-    <!-- VIDEO INTRO -->
     <div id="splash-screen">
         <video id="intro-video" autoplay muted playsinline>
             <source src="logo.mp4" type="video/mp4">
@@ -154,7 +164,6 @@
         <button id="btn-skip">Saltar Intro</button>
     </div>
 
-    <!-- PANEL ADMIN MAESTRO -->
     <div id="main-app">
         <header class="admin-header">
             <div class="brand-logo">
@@ -168,7 +177,6 @@
         </header>
 
         <main class="admin-container">
-            <!-- KPIs -->
             <section class="admin-kpis">
                 <div class="kpi-card glass-panel">
                     <h3>Total Atletas</h3>
@@ -184,7 +192,6 @@
                 </div>
             </section>
 
-            <!-- ACCIONES (Solo visibles en Escritorio) -->
             <section class="admin-actions">
                 <a href="usuarios.html" class="btn btn-outline">👥 Directorio</a>
                 <a href="planificacion.html" class="btn btn-outline">📅 Planificar</a>
@@ -192,7 +199,6 @@
                 <a href="rutinas.html" class="btn btn-primary">⚡ Nueva Rutina</a>
             </section>
 
-            <!-- TABLA -->
             <section class="admin-table-section glass-panel">
                 <div class="table-header">
                     <h2>CONTROL DE COBRANZAS</h2>
@@ -218,7 +224,7 @@
         </main>
     </div>
 
-    <!-- MENÚ RADIAL MÓVIL (Sustituye la botonera en teléfonos) -->
+    <!-- MENÚ RADIAL MÓVIL -->
     <div class="radial-menu-wrapper" id="radial-menu">
         <div class="radial-label" id="radial-label">Toca y desliza</div>
         <div class="radial-bubble" id="rb-0">👥</div>
@@ -287,7 +293,6 @@
 
     <div id="install-banner" onclick="instalarAppAdmin()">📲 Instalar Panel de Control</div>
 
-    <!-- SCRIPT CENTRAL -->
     <script>
         const splashScreen = document.getElementById('splash-screen');
         const mainApp = document.getElementById('main-app');
@@ -373,14 +378,10 @@
             else { window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank'); }
         }
 
-        // ==========================================
-        // LÓGICA DEL MENÚ RADIAL TÁCTIL (INTELIGENTE)
-        // ==========================================
         const radialMenu = document.getElementById('radial-menu');
         const radialBtn = document.getElementById('radial-center-btn');
         const radialLabel = document.getElementById('radial-label');
         
-        // Mapeo matemático de burbujas y acciones
         const configBurbujas = [
             { el: document.getElementById('rb-0'), angle: -160, action: 'usuarios.html', name: '👥 Directorio Atletas' },
             { el: document.getElementById('rb-1'), angle: -115, action: 'planificacion.html', name: '📅 Gestor Planes' },
@@ -397,9 +398,8 @@
             menuActive = true;
             radialMenu.classList.add('active');
             radialLabel.innerText = "Desliza el dedo";
-            if(navigator.vibrate) navigator.vibrate(50); // Vibración háptica
+            if(navigator.vibrate) navigator.vibrate(50);
             
-            // Calculamos el centro del botón para la matemática vectorial
             const rect = radialBtn.getBoundingClientRect();
             centerX = rect.left + rect.width / 2;
             centerY = rect.top + rect.height / 2;
@@ -410,7 +410,6 @@
             radialMenu.classList.remove('active');
             configBurbujas.forEach(b => b.el.classList.remove('hovered'));
             
-            // Si el usuario soltó el dedo sobre una opción, ejecutamos la acción
             if (selectedBubble) {
                 if(navigator.vibrate) navigator.vibrate(50);
                 if (selectedBubble.action === 'share') {
@@ -422,17 +421,15 @@
             selectedBubble = null;
         }
 
-        // 1. Al tocar el botón central
         radialBtn.addEventListener('touchstart', (e) => {
             e.preventDefault(); 
             touchStarted = true;
             openRadial(); 
         }, { passive: false });
 
-        // 2. Al arrastrar el dedo por la pantalla
         document.addEventListener('touchmove', (e) => {
             if (!menuActive) return;
-            e.preventDefault(); // Evita que la pantalla haga scroll mientras arrastras
+            e.preventDefault();
             
             const touch = e.touches[0];
             const dx = touch.clientX - centerX;
@@ -443,7 +440,6 @@
             configBurbujas.forEach(b => b.el.classList.remove('hovered'));
             radialLabel.innerText = "Cancelar";
 
-            // Si arrastró el dedo fuera del centro, calculamos el ángulo de inclinación
             if (distancia > 30) {
                 let anguloDedo = Math.atan2(dy, dx) * (180 / Math.PI);
                 let minimaDiferencia = Infinity;
@@ -452,7 +448,6 @@
                     let diff = Math.abs(anguloDedo - b.angle);
                     if (diff > 180) diff = 360 - diff; 
                     
-                    // Si el ángulo del dedo coincide con el área de una burbuja (margen de 50 grados)
                     if (diff < minimaDiferencia && diff < 50) { 
                         minimaDiferencia = diff;
                         selectedBubble = b;
@@ -466,17 +461,12 @@
             }
         }, { passive: false });
 
-        // 3. Al soltar el dedo
         document.addEventListener('touchend', (e) => {
             if (!touchStarted) return;
             touchStarted = false;
             closeRadial();
         });
 
-
-        // ==========================================
-        // ARRANQUE E INSTALACIÓN PWA
-        // ==========================================
         function bootSystem() {
             if (bootInitiated) return;
             bootInitiated = true;

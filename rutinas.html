@@ -2,9 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constructor de Rutinas | Movement House</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Crear Rutina - Movement House</title>
     
+    <meta name="theme-color" content="#000000">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     
     <script src="config.js"></script>
@@ -15,378 +16,274 @@
             --bg-base: #000000; --bg-surface: #0a0a0a; --bg-card: #111111;
             --accent: #FF5E00; --accent-hover: #e05300; --accent-glow: rgba(255, 94, 0, 0.25);
             --text-main: #ffffff; --text-muted: #888888;
-            --border-light: rgba(255, 255, 255, 0.08);
-            --input-bg: #1a1a1a; --success: #10b981; --danger: #ef4444;
+            --danger: #ef4444; --success: #10b981;
+            --border-light: rgba(255, 255, 255, 0.08); --input-bg: #1a1a1a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Inter', sans-serif; min-height: 100vh; padding-bottom: 5rem; }
+        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Inter', sans-serif; padding-bottom: 5rem; -webkit-font-smoothing: antialiased; }
         h1, h2, h3 { font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .builder-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border-light); position: sticky; top: 0; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); z-index: 50; }
-        .brand-logo { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.5rem; font-style: italic; display: flex; align-items: center; gap: 15px; text-decoration: none; }
-        .brand-logo .orange { color: var(--accent); } .brand-logo .white { color: var(--text-main); }
-        .back-arrow { color: var(--text-muted); font-style: normal; font-size: 1.2rem; transition: 0.3s;}
-        .back-arrow:hover { color: var(--accent); }
-        
-        .btn-save { background: var(--accent); color: white; border: none; padding: 0.7rem 1.5rem; border-radius: 6px; font-size: 0.95rem; cursor: pointer; transition: 0.3s; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; }
-        .btn-save:hover { background: var(--accent-hover); box-shadow: 0 4px 15px var(--accent-glow); }
+        /* CABECERA FLOTANTE TÁCTIL */
+        .top-nav { position: sticky; top: 0; z-index: 100; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-light); padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { color: var(--text-muted); text-decoration: none; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: 0.3s; }
+        .back-btn:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-title { font-size: 1.2rem; margin: 0; }
+        .btn-save { background: var(--success); color: black; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 5px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .btn-save:active { transform: scale(0.95); }
 
-        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
-        
-        .routine-meta { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; }
-        .form-group label { display: block; font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; letter-spacing: 0.5px;}
-        .form-group input, .form-group select { width: 100%; background: var(--input-bg); border: 1px solid var(--border-light); color: white; padding: 0.8rem; border-radius: 6px; outline: none; font-family: 'Inter', sans-serif; transition: 0.3s; }
-        .form-group input:focus, .form-group select:focus { border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+        .container { max-width: 800px; margin: 0 auto; padding: 1.5rem 1rem; }
 
-        .day-block { margin-bottom: 2rem; border: 1px solid var(--border-light); border-radius: 12px; background: var(--bg-surface); overflow: hidden; }
-        .day-header { background: #141414; padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-light); gap: 1rem; }
-        .day-title-input { background: transparent; border: none; color: var(--accent); font-size: 1.5rem; outline: none; width: 150px; font-family: 'Oswald', sans-serif; text-transform: uppercase; }
-        .acondicionamiento-input { flex-grow: 1; background: var(--input-bg); border: 1px solid var(--border-light); color: var(--text-main); padding: 0.6rem; border-radius: 6px; height: 45px; font-family: 'Inter', sans-serif; resize: vertical; }
+        /* SECCIÓN DE CONFIGURACIÓN BÁSICA */
+        .config-section { background: var(--bg-card); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-light); margin-bottom: 2rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.85rem; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 1rem; border-radius: 8px; background: var(--input-bg); border: 1px solid var(--border-light); color: white; font-family: 'Inter', sans-serif; font-size: 1rem; transition: 0.3s; outline: none; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
         
-        .exercises-grid { padding: 1rem; overflow-x: auto; }
-        .grid-header { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1.5fr 90px; gap: 10px; padding: 0 0.5rem 0.5rem 0.5rem; border-bottom: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.8rem; font-family: 'Oswald', sans-serif; min-width: 900px; }
-        .exercise-row { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr 1.5fr 90px; gap: 10px; padding: 0.5rem; align-items: start; min-width: 900px; transition: 0.2s; border-radius: 6px; }
-        .exercise-row:hover { background: rgba(255, 255, 255, 0.02); }
-        .exercise-row input, .exercise-row textarea { width: 100%; background: var(--input-bg); border: 1px solid transparent; color: white; padding: 0.7rem; border-radius: 6px; font-size: 0.9rem; font-family: 'Inter', sans-serif; transition: 0.3s; }
-        .exercise-row input:focus, .exercise-row textarea:focus { border-color: var(--accent); outline: none; background: #000; }
-        
-        .row-actions { display: flex; gap: 4px; align-items: center; justify-content: flex-end; }
-        .btn-icon { background: transparent; border: 1px solid transparent; color: var(--text-muted); width: 28px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 1rem; }
-        .btn-icon:hover { background: rgba(255,255,255,0.05); color: white; border-color: var(--border-light); }
-        .btn-icon.history:hover { color: #3b82f6; border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
-        .btn-icon.delete:hover { color: var(--danger); border-color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+        /* TARJETAS DE DÍAS (BLOQUES) */
+        #blocks-container { display: grid; gap: 1.5rem; margin-bottom: 2rem; }
+        .day-block { background: var(--bg-card); border-left: 4px solid var(--accent); border-radius: 12px; padding: 1.5rem 1rem; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .block-header input { background: transparent; border: none; color: var(--accent); font-family: 'Oswald', sans-serif; font-size: 1.3rem; width: 70%; outline: none; text-transform: uppercase; }
+        .block-header input::placeholder { color: rgba(255, 94, 0, 0.5); }
+        .btn-delete-block { background: transparent; color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; }
 
-        .add-row-btn { width: 100%; background: transparent; border: 1px dashed var(--border-light); color: var(--text-muted); padding: 0.8rem; border-radius: 6px; margin-top: 1rem; cursor: pointer; font-family: 'Oswald', sans-serif; text-transform: uppercase; transition: 0.3s; }
-        .add-row-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+        /* LISTA DE EJERCICIOS */
+        .exercise-list { display: grid; gap: 1rem; margin-top: 1rem; }
+        .exercise-item { background: #141414; border: 1px dashed var(--border-light); border-radius: 8px; padding: 1rem; position: relative; }
         
-        .add-day-master { display: block; width: 100%; max-width: 400px; margin: 3rem auto; background: transparent; border: 2px solid var(--accent); color: var(--accent); padding: 1rem; border-radius: 8px; cursor: pointer; font-family: 'Oswald', sans-serif; text-transform: uppercase; transition: 0.3s; }
-        .add-day-master:hover { background: var(--accent); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
+        /* GRILLA OPTIMIZADA PARA TELÉFONOS */
+        .exercise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .col-full { grid-column: span 2; }
+        
+        .ex-input { background: #000; border: 1px solid var(--border-light); color: white; padding: 0.8rem; border-radius: 6px; font-size: 0.9rem; width: 100%; outline: none; }
+        .ex-input:focus { border-color: var(--accent); }
+        
+        .btn-delete-ex { position: absolute; top: -10px; right: -10px; background: var(--danger); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
 
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s; }
-        .modal.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--bg-card); padding: 2.5rem; border-radius: 12px; border: 1px solid var(--border-light); width: 100%; max-width: 600px; transform: translateY(20px); transition: 0.3s; }
-        .modal.active .modal-content { transform: translateY(0); }
-        .history-list { margin-top: 1.5rem; max-height: 300px; overflow-y: auto; padding-right: 10px; }
-        .history-list::-webkit-scrollbar { width: 6px; }
-        .history-list::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
-        .history-item { padding: 1rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;}
-        .history-item:last-child { border-bottom: none; }
-        .history-date { color: var(--text-muted); font-size: 0.85rem; font-family: 'Oswald', sans-serif; }
-        .history-data { color: white; font-weight: 600; font-family: 'Inter', sans-serif; }
+        /* BOTONES DE ACCIÓN */
+        .btn-add-ex { background: transparent; color: var(--accent); border: 1px dashed var(--accent); width: 100%; padding: 1rem; border-radius: 8px; font-family: 'Oswald', sans-serif; cursor: pointer; margin-top: 1rem; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add-block { background: var(--input-bg); color: white; border: 1px solid var(--border-light); width: 100%; padding: 1.2rem; border-radius: 12px; font-family: 'Oswald', sans-serif; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-add-block:hover { border-color: var(--accent); color: var(--accent); }
+
     </style>
 </head>
 <body>
 
-    <header class="builder-header">
-        <a href="index.html" class="brand-logo">
-            <span class="back-arrow">←</span>
-            <span><span class="orange">M</span><span class="white">OVEMENT</span> <span class="orange">H</span><span class="white">OUSE</span></span>
-        </a>
-        <button id="btn-save-routine" class="btn-save" onclick="guardarRutina()">GUARDAR PLANIFICACIÓN</button>
-    </header>
+    <!-- CABECERA FLOTANTE -->
+    <nav class="top-nav">
+        <a href="index.html" class="back-btn">←</a>
+        <h2 class="nav-title">Nueva Planificación</h2>
+        <button class="btn-save" onclick="guardarRutina()" id="btn-submit">
+            ✔ Guardar
+        </button>
+    </nav>
 
     <main class="container">
-        <section class="routine-meta">
+        
+        <!-- CONFIGURACIÓN GLOBAL -->
+        <section class="config-section">
             <div class="form-group">
-                <label>NOMBRE DEL BLOQUE</label>
-                <input type="text" id="routine-name" placeholder="Ej: Fuerza Máxima - Fase 1">
+                <label>Nombre de la Rutina</label>
+                <input type="text" id="rutina-nombre" placeholder="Ej: Fase Hipertrofia 1">
             </div>
             <div class="form-group">
-                <label>ASIGNAR A (ATLETA)</label>
-                <select id="routine-assign"><option value="global">Planilla Global</option></select>
-            </div>
-            <div class="form-group">
-                <label>FECHA DE INICIO</label>
-                <input type="date" id="routine-date">
+                <label>Asignar a Atleta</label>
+                <select id="rutina-asignado">
+                    <option value="global">🌍 Global (Para todos)</option>
+                    <!-- Los atletas se cargan aquí -->
+                </select>
             </div>
         </section>
 
-        <div id="days-container"></div>
-        <button class="add-day-master" onclick="agregarDia()">+ AÑADIR NUEVO DÍA</button>
+        <!-- CONTENEDOR DE DÍAS -->
+        <div id="blocks-container">
+            <!-- El día 1 se carga por defecto -->
+        </div>
+
+        <button class="btn-add-block" onclick="agregarBloque()">
+            <span>+</span> Añadir un Día
+        </button>
+
     </main>
 
-    <div id="historialModal" class="modal">
-        <div class="modal-content">
-            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; align-items:center;">
-                <div>
-                    <h2 style="color: white; font-size: 1.5rem;">HISTORIAL DE MARCAS</h2>
-                    <p id="historial-ejercicio-titulo" style="color: var(--accent); font-weight: 600; font-size: 0.9rem; text-transform: uppercase;">-</p>
-                </div>
-                <button onclick="cerrarHistorial()" style="background:none; border:none; color:var(--text-muted); font-size:2rem; cursor:pointer;">×</button>
-            </div>
-            <div class="history-list" id="historial-lista"></div>
-        </div>
-    </div>
-    
-    <template id="row-template">
-        <div class="exercise-row">
-            <input type="text" placeholder="Ej: Back Squat" class="col-exercise">
-            <!-- AQUÍ SE COLOCA EL ENLACE DEL VIDEO PARA QUE APAREZCA EN LA APP DEL ATLETA -->
-            <input type="url" placeholder="URL Video YouTube" class="col-video">
-            <input type="text" placeholder="Intensidad (Ej: 80% / 100kg)" class="col-intensity">
-            <input type="text" placeholder="Sets x Reps (Ej: 4x5)" class="col-reps">
-            <input type="text" placeholder="Descanso (Ej: 3 min)" class="col-rest">
-            <textarea rows="1" placeholder="Notas/RIR (Ej: Bajar en 3 segs)" class="col-notes"></textarea>
-            <div class="row-actions">
-                <button class="btn-icon history" title="Ver Historial (PRs)" onclick="verHistorial(this)">🕒</button>
-                <button class="btn-icon" title="Duplicar Ejercicio" onclick="duplicarFila(this)">⧉</button>
-                <button class="btn-icon delete" title="Eliminar Ejercicio" onclick="eliminarFila(this)">×</button>
-            </div>
-        </div>
-    </template>
-
-    <template id="day-template">
-        <div class="day-block">
-            <div class="day-header">
-                <input type="text" class="day-title-input" value="Día X">
-                <textarea class="acondicionamiento-input" placeholder="Escribe aquí el acondicionamiento, calentamiento o indicaciones generales para el día..."></textarea>
-                <button class="btn-icon delete" style="width: 35px; height: 35px; font-size: 1.2rem;" onclick="eliminarDia(this)">🗑</button>
-            </div>
-            <div class="exercises-grid">
-                <div class="grid-header">
-                    <div>EJERCICIO</div><div>VIDEO REF.</div><div>INTENSIDAD</div><div>SETS x REPS</div><div>DESCANSO</div><div>ANOTACIONES</div><div style="text-align: right;">ACCIONES</div>
-                </div>
-                <div class="rows-container"></div>
-                <button class="add-row-btn" onclick="agregarFila(this)">+ AÑADIR EJERCICIO</button>
-            </div>
-        </div>
-    </template>
-
     <script>
-        let dbClient = null;
-        let diaContador = 0;
-        let rutineEditId = null;
+        let dbClient;
+        let bloqueContador = 0;
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (typeof window.MH_CONFIG !== 'undefined') {
                 dbClient = window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
-                await cargarAtletasSelect();
-
-                const urlParams = new URLSearchParams(window.location.search);
-                rutineEditId = urlParams.get('edit');
-
-                if (rutineEditId) {
-                    await reconstruirRutina(rutineEditId);
-                } else {
-                    agregarDia(); 
-                }
-            } else {
-                alert("Error crítico: Falta el archivo config.js");
+                await cargarAtletas();
+                agregarBloque(); // Agregar el primer día vacío automáticamente
             }
         });
 
-        async function cargarAtletasSelect() {
-            const select = document.getElementById('routine-assign');
+        async function cargarAtletas() {
             try {
                 const { data } = await dbClient.from('profiles').select('id, name').order('name');
+                const select = document.getElementById('rutina-asignado');
                 if (data) {
                     data.forEach(atleta => {
                         select.innerHTML += `<option value="${atleta.id}">${atleta.name}</option>`;
                     });
                 }
-            } catch (error) {}
-        }
-
-        function agregarDia(datosDia = null) {
-            diaContador++;
-            const template = document.getElementById('day-template');
-            const clone = template.content.cloneNode(true);
-            const rowsContainer = clone.querySelector('.rows-container');
-
-            if (datosDia) {
-                clone.querySelector('.day-title-input').value = datosDia.day;
-                clone.querySelector('.acondicionamiento-input').value = datosDia.warmup || '';
-                
-                if (datosDia.exercises && datosDia.exercises.length > 0) {
-                    datosDia.exercises.forEach(exe => rowsContainer.appendChild(crearFila(exe)));
-                } else {
-                    rowsContainer.appendChild(crearFila());
-                }
-            } else {
-                clone.querySelector('.day-title-input').value = `DÍA ${diaContador}`;
-                rowsContainer.appendChild(crearFila());
+            } catch (e) {
+                console.error("Error al cargar atletas");
             }
-
-            document.getElementById('days-container').appendChild(clone);
         }
 
-        function crearFila(datosFila = null) {
-            const template = document.getElementById('row-template');
-            const clone = template.content.cloneNode(true);
+        // ==========================================
+        // CREADOR DE DÍAS Y EJERCICIOS (DOM)
+        // ==========================================
+        function agregarBloque() {
+            bloqueContador++;
+            const blockId = `block-${bloqueContador}`;
             
-            if (datosFila) {
-                clone.querySelector('.col-exercise').value = datosFila.exercise || '';
-                clone.querySelector('.col-video').value = datosFila.video || '';
-                clone.querySelector('.col-intensity').value = datosFila.intensity || '';
-                clone.querySelector('.col-reps').value = datosFila.reps || '';
-                clone.querySelector('.col-rest').value = datosFila.rest || '';
-                clone.querySelector('.col-notes').value = datosFila.notes || '';
-            }
-            return clone;
+            const html = `
+                <div class="day-block" id="${blockId}">
+                    <div class="block-header">
+                        <input type="text" class="block-name" placeholder="Ej: DÍA ${bloqueContador} - PIERNAS">
+                        <button class="btn-delete-block" onclick="eliminarElemento('${blockId}')">🗑</button>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <textarea class="block-warmup" rows="2" placeholder="Notas del entrenador o Acondicionamiento (Opcional)..."></textarea>
+                    </div>
+
+                    <div class="exercise-list" id="ex-list-${blockId}"></div>
+                    
+                    <button class="btn-add-ex" onclick="agregarEjercicio('${blockId}')">
+                        + Agregar Ejercicio
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('blocks-container').insertAdjacentHTML('beforeend', html);
+            agregarEjercicio(blockId); // Agrega un ejercicio vacío por defecto al crear el día
         }
 
-        window.agregarDia = agregarDia;
-        
-        window.eliminarDia = (btn) => { 
-            if(confirm('¿Seguro que deseas eliminar este día completo y sus ejercicios?')) {
-                btn.closest('.day-block').remove(); 
-            }
-        };
-        
-        window.agregarFila = (btn) => { 
-            btn.previousElementSibling.appendChild(crearFila()); 
-        };
-        
-        window.eliminarFila = (btn) => { 
-            const row = btn.closest('.exercise-row'); 
-            row.style.opacity = '0'; 
-            setTimeout(() => row.remove(), 200); 
-        };
-        
-        window.duplicarFila = (btn) => {
-            const originalRow = btn.closest('.exercise-row');
-            const cloneRow = originalRow.cloneNode(true);
+        function agregarEjercicio(blockId) {
+            const exId = `ex-${Math.random().toString(36).substr(2, 9)}`;
             
-            const inputsOriginales = originalRow.querySelectorAll('input, textarea');
-            const inputsClonados = cloneRow.querySelectorAll('input, textarea');
-            inputsOriginales.forEach((input, index) => {
-                inputsClonados[index].value = input.value;
-            });
+            const html = `
+                <div class="exercise-item" id="${exId}">
+                    <button class="btn-delete-ex" onclick="eliminarElemento('${exId}')">×</button>
+                    
+                    <div class="exercise-grid">
+                        <div class="col-full">
+                            <input type="text" class="ex-input ex-name" placeholder="Nombre del Ejercicio (Ej: Back Squat)">
+                        </div>
+                        <div>
+                            <input type="text" class="ex-input ex-reps" placeholder="Reps (Ej: 3x8)">
+                        </div>
+                        <div>
+                            <input type="text" class="ex-input ex-intensity" placeholder="Intensidad (Ej: 80% o RPE 8)">
+                        </div>
+                        <div>
+                            <input type="text" class="ex-input ex-rest" placeholder="Descanso (Ej: 90s)">
+                        </div>
+                        <div>
+                            <input type="text" class="ex-input ex-video" placeholder="Enlace YouTube">
+                        </div>
+                        <div class="col-full">
+                            <input type="text" class="ex-input ex-notes" placeholder="Técnica o Notas (Opcional)">
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            originalRow.parentNode.insertBefore(cloneRow, originalRow.nextSibling);
-        };
-
-        async function reconstruirRutina(id) {
-            try {
-                const { data, error } = await dbClient.from('routines').select('*').eq('id', id).single();
-                if (error) throw error;
-                
-                document.getElementById('routine-name').value = data.name;
-                document.getElementById('routine-assign').value = data.assigned_to;
-                if(data.start_date) document.getElementById('routine-date').value = data.start_date;
-                
-                if (data.blocks && data.blocks.length > 0) {
-                    data.blocks.forEach(bloque => agregarDia(bloque));
-                }
-            } catch (error) {
-                alert("Hubo un error recuperando la información de la rutina.");
-                agregarDia();
-            }
+            document.getElementById(`ex-list-${blockId}`).insertAdjacentHTML('beforeend', html);
         }
 
-        window.guardarRutina = async function() {
-            const btn = document.getElementById('btn-save-routine');
-            const nombre = document.getElementById('routine-name').value;
-            const asignado = document.getElementById('routine-assign').value;
-            const fecha = document.getElementById('routine-date').value || null;
+        function eliminarElemento(id) {
+            document.getElementById(id).remove();
+        }
 
-            if (!nombre.trim()) return alert("Por favor, asigna un Nombre del Bloque antes de guardar.");
+        // ==========================================
+        // PROCESAMIENTO Y GUARDADO (SUPABASE)
+        // ==========================================
+        async function guardarRutina() {
+            const btnSubmit = document.getElementById('btn-submit');
+            const nombreRutina = document.getElementById('rutina-nombre').value.trim();
+            const asignadoA = document.getElementById('rutina-asignado').value;
 
-            const blocksArray = [];
-            document.querySelectorAll('.day-block').forEach(day => {
-                const exercises = [];
+            if (!nombreRutina) {
+                return alert("Por favor, ponle un nombre a la rutina.");
+            }
+
+            // Recopilar datos leyendo el HTML
+            const bloquesElements = document.querySelectorAll('.day-block');
+            const bloquesEstructurados = [];
+
+            if (bloquesElements.length === 0) {
+                return alert("Debes agregar al menos un día a la rutina.");
+            }
+
+            for (let b of bloquesElements) {
+                const dayName = b.querySelector('.block-name').value.trim();
+                const warmup = b.querySelector('.block-warmup').value.trim();
                 
-                day.querySelectorAll('.exercise-row').forEach(row => {
-                    const exeName = row.querySelector('.col-exercise').value;
-                    if(exeName.trim() !== '') {
-                        exercises.push({
-                            exercise: exeName, 
-                            video: row.querySelector('.col-video').value,
-                            intensity: row.querySelector('.col-intensity').value,
-                            reps: row.querySelector('.col-reps').value, 
-                            rest: row.querySelector('.col-rest').value,
-                            notes: row.querySelector('.col-notes').value
+                if (!dayName) return alert("Uno de los días no tiene nombre.");
+
+                const ejerciciosArr = [];
+                const ejerciciosElements = b.querySelectorAll('.exercise-item');
+
+                for (let ex of ejerciciosElements) {
+                    const exName = ex.querySelector('.ex-name').value.trim();
+                    if (exName) {
+                        ejerciciosArr.push({
+                            exercise: exName,
+                            reps: ex.querySelector('.ex-reps').value.trim(),
+                            intensity: ex.querySelector('.ex-intensity').value.trim(),
+                            rest: ex.querySelector('.ex-rest').value.trim(),
+                            video: ex.querySelector('.ex-video').value.trim(),
+                            notes: ex.querySelector('.ex-notes').value.trim()
                         });
                     }
-                });
+                }
 
-                blocksArray.push({
-                    day: day.querySelector('.day-title-input').value,
-                    warmup: day.querySelector('.acondicionamiento-input').value, 
-                    exercises: exercises
-                });
-            });
+                if (ejerciciosArr.length === 0) {
+                    return alert(`El día "${dayName}" no tiene ejercicios. Añade al menos uno o bórralo.`);
+                }
 
-            btn.innerText = 'PROCESANDO...'; 
-            btn.disabled = true;
-            
-            const payload = { 
-                name: nombre, 
-                assigned_to: asignado, 
-                start_date: fecha, 
-                blocks: blocksArray 
-            };
+                bloquesEstructurados.push({
+                    day: dayName,
+                    warmup: warmup,
+                    exercises: ejerciciosArr
+                });
+            }
+
+            // Iniciar proceso de guardado
+            btnSubmit.innerText = "⏳ Guardando...";
+            btnSubmit.disabled = true;
 
             try {
-                if (rutineEditId) {
-                    const { error } = await dbClient.from('routines').update(payload).eq('id', rutineEditId);
-                    if (error) throw error;
-                    btn.innerText = '¡PLANIFICACIÓN ACTUALIZADA!';
-                } else {
-                    const { error } = await dbClient.from('routines').insert([payload]);
-                    if (error) throw error;
-                    btn.innerText = '¡PLANIFICACIÓN GUARDADA!';
-                }
+                const { error } = await dbClient.from('routines').insert([{
+                    name: nombreRutina,
+                    assigned_to: asignadoA,
+                    blocks: bloquesEstructurados
+                }]);
+
+                if (error) throw error;
+
+                btnSubmit.style.background = "var(--success)";
+                btnSubmit.innerText = "✔ ¡RUTINA CREADA!";
                 
-                btn.style.background = 'var(--success)';
-                // Al guardar, redirecciona al gestor de planificaciones automáticamente
-                setTimeout(() => window.location.href = 'planificacion.html', 1500);
+                setTimeout(() => {
+                    window.location.href = "index.html"; // Volver al panel admin
+                }, 1500);
 
             } catch (error) {
                 console.error(error);
-                btn.innerText = 'ERROR AL GUARDAR'; 
-                btn.style.background = 'var(--danger)';
-                setTimeout(() => { 
-                    btn.innerText = 'GUARDAR PLANIFICACIÓN'; 
-                    btn.style.background = ''; 
-                    btn.disabled = false; 
-                }, 3000);
+                alert("Error al guardar la rutina.");
+                btnSubmit.style.background = "var(--accent)";
+                btnSubmit.innerText = "✔ Guardar";
+                btnSubmit.disabled = false;
             }
         }
-
-        window.verHistorial = async function(btn) {
-            const row = btn.closest('.exercise-row');
-            const ejercicio = row.querySelector('.col-exercise').value;
-            const atletaId = document.getElementById('routine-assign').value;
-
-            if(!ejercicio.trim()) return alert("Debes escribir el nombre del ejercicio antes de buscar su historial.");
-            if(atletaId === 'global') return alert("Selecciona a un atleta específico en el panel superior para ver su historial.");
-
-            document.getElementById('historial-ejercicio-titulo').innerText = ejercicio;
-            document.getElementById('historialModal').classList.add('active');
-            
-            const lista = document.getElementById('historial-lista');
-            lista.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">Buscando récords...</div>';
-
-            try {
-                const { data, error } = await dbClient.from('personal_records')
-                    .select('*')
-                    .eq('user_id', atletaId)
-                    .ilike('exercise', `%${ejercicio}%`)
-                    .order('created_at', { ascending: false });
-                
-                if (data && data.length > 0) {
-                    lista.innerHTML = data.map(pr => `
-                        <div class="history-item">
-                            <span class="history-date">${new Date(pr.created_at).toLocaleDateString()}</span>
-                            <span class="history-data">
-                                ${pr.weight}kg x ${pr.reps} reps 
-                                <small style="color:var(--accent); margin-left:10px;">(Est 1RM: ${Math.round(pr.rm_calculated)}kg)</small>
-                            </span>
-                        </div>
-                    `).join('');
-                } else {
-                    lista.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">El atleta aún no tiene marcas registradas para este movimiento.</div>';
-                }
-            } catch (error) {
-                lista.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--danger);">Error conectando con el servidor.</div>';
-            }
-        }
-
-        window.cerrarHistorial = () => {
-            document.getElementById('historialModal').classList.remove('active');
-        };
     </script>
 </body>
 </html>
