@@ -2,14 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Panel de Administración - Movement House</title>
+    
     <!-- Configuración PWA Admin -->
     <meta name="theme-color" content="#FF5E00">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest-admin.json">
     <link rel="apple-touch-icon" href="icon-192.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     
     <!-- Configuración Global y SDK -->
@@ -48,7 +50,7 @@
         
         .glass-panel { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
 
-        .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border-light); background: var(--bg-surface); margin-bottom: 2rem; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 2.5rem; border-bottom: 1px solid var(--border-light); background: var(--bg-surface); margin-bottom: 2rem; position: sticky; top: 0; z-index: 50;}
         .brand-logo { font-family: 'Oswald', sans-serif; font-weight: 700; font-size: 1.5rem; font-style: italic; display: flex; align-items: center; gap: 10px; }
         .brand-logo .orange { color: var(--accent); } .brand-logo .white { color: var(--text-main); }
         .badge-admin { background: var(--danger); color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; font-family: 'Inter', sans-serif; font-style: normal; }
@@ -97,7 +99,7 @@
         .btn-icon.delete:hover { background: var(--danger-bg); color: var(--danger); border-color: var(--danger); }
 
         /* MODAL */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s; padding: 1rem;}
         .modal.active { display: flex; opacity: 1; }
         .modal-content { background: var(--bg-card); padding: 2.5rem; width: 100%; max-width: 550px; border: 1px solid var(--border-light); border-radius: 12px; position: relative; transform: translateY(20px); transition: 0.3s; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         .modal.active .modal-content { transform: translateY(0); }
@@ -111,6 +113,22 @@
 
         .skeleton { background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%); background-size: 200% 100%; animation: loading 1.5s infinite; color: transparent !important; border-radius: 4px; user-select: none; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* BANNER DE INSTALACIÓN ADMIN */
+        #install-banner { display: none; background: var(--accent); color: white; padding: 1.2rem; text-align: center; font-weight: 600; font-size: 0.95rem; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000; cursor: pointer; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Oswald', sans-serif;}
+
+        /* OPTIMIZACIÓN EXTREMA PARA TELÉFONOS */
+        @media (max-width: 768px) {
+            .admin-header { padding: 1rem; flex-direction: column; gap: 15px; align-items: flex-start; }
+            .admin-container { padding: 0 1rem 6rem 1rem; } /* Margen inferior para que el banner no tape el contenido */
+            .admin-actions { flex-direction: column; gap: 10px; }
+            .admin-actions .btn { width: 100%; justify-content: center; padding: 1rem; }
+            .admin-kpis { grid-template-columns: 1fr; }
+            .kpi-card { padding: 1.2rem; }
+            .kpi-value { font-size: 2.8rem; }
+            .table-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .modal-content { padding: 1.5rem; }
+        }
 
     </style>
 </head>
@@ -246,6 +264,9 @@
         </div>
     </div>
 
+    <!-- BANNER DE INSTALACIÓN ADMIN -->
+    <div id="install-banner" onclick="instalarAppAdmin()">📲 Instalar Panel de Control en el Teléfono</div>
+
     <!-- SCRIPT DE INICIO SEGURO, MÉTRICAS Y HERRAMIENTA DE ENLACES -->
     <script>
         const splashScreen = document.getElementById('splash-screen');
@@ -267,7 +288,7 @@
                 if (error) throw error;
 
                 if (data) {
-                    perfilesGlobales = data; // Guardamos para la herramienta de Compartir
+                    perfilesGlobales = data; 
                     const total = data.length;
                     let activos = 0;
                     let vencidos = 0;
@@ -301,7 +322,6 @@
             }
         }
 
-        // --- LÓGICA DE HERRAMIENTA: COMPARTIR ENLACE ---
         function abrirModalEnlace() {
             document.getElementById('modalEnlace').classList.add('active');
             const select = document.getElementById('select-enlace-atleta');
@@ -330,7 +350,6 @@
                 input.value = '';
                 return;
             }
-            // Toma la URL del navegador para saber dónde está alojada la web automáticamente
             const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
             input.value = `${baseUrl}/index-user.html?id=${id}`;
         }
@@ -341,7 +360,6 @@
             input.select();
             document.execCommand('copy');
             
-            // Efecto visual rápido
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
             btn.innerHTML = '✅ ¡Copiado!';
@@ -356,10 +374,9 @@
             const atleta = perfilesGlobales.find(p => p.id === id);
             let phone = atleta.phone || atleta.telefono || '';
             
-            // Limpiar el número de teléfono
             phone = phone.replace(/\D/g, '');
             if (phone.startsWith('0')) {
-                phone = '58' + phone.substring(1); // Asume Venezuela si empieza en 0. Cámbialo por tu código de país si es necesario.
+                phone = '58' + phone.substring(1); 
             }
 
             const firstName = atleta.name.split(' ')[0];
@@ -368,13 +385,10 @@
             if (phone && phone.length >= 10) {
                 window.open(`https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`, '_blank');
             } else {
-                // Si el atleta no tiene teléfono registrado, abre WhatsApp Web para elegir contacto manualmente
                 window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, '_blank');
             }
         }
-        // ---------------------------------------------
 
-        // Sistema de Arranque Principal
         function bootSystem() {
             if (bootInitiated) return;
             bootInitiated = true;
@@ -411,20 +425,25 @@
             } else {
                 bootSystem();
             }
-        }// LÓGICA PWA PARA EL ADMIN (Instalación)
+        }
+
+        // LÓGICA PWA PARA EL ADMIN (Instalación Asegurada)
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Si quieres puedes crear un botón en tu panel que diga "Instalar App Admin"
-            // y que ejecute la función instalarAppAdmin()
-            console.log("App Admin lista para instalarse");
+            // Aquí encendemos el banner visual
+            document.getElementById('install-banner').style.display = 'block';
         });
 
         async function instalarAppAdmin() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    // Ocultar banner si el usuario aceptó la instalación
+                    document.getElementById('install-banner').style.display = 'none';
+                }
                 deferredPrompt = null;
             }
         }
@@ -435,6 +454,5 @@
             });
         }
     </script>
-    
 </body>
 </html>
