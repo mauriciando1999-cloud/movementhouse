@@ -305,7 +305,7 @@
             const db = window.dbClient || window._sb || window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
 
             try {
-                const { data, error } = await db.from('profiles').select('*');
+                const { data, error } = await db.from('profiles').select('*').order('fecha_corte', { ascending: true });
                 if (error) throw error;
 
                 if (data) {
@@ -313,25 +313,72 @@
                     const total = data.length;
                     let activos = 0;
                     let vencidos = 0;
+                    
                     const hoy = new Date();
+                    hoy.setHours(0,0,0,0);
+                    
+                    const tbody = document.getElementById('directory-tbody');
+                    tbody.innerHTML = '';
 
                     data.forEach(atleta => {
-                        const estadoText = String(atleta.estado || atleta.status || '').toLowerCase().trim();
-                        if (estadoText === 'activo' || estadoText === 'solvente' || estadoText === 'al día') { activos++; } 
-                        else if (estadoText === 'vencido' || estadoText === 'deudor' || estadoText === 'inactivo') { vencidos++; } 
-                        else if (atleta.fecha_corte) {
-                            const fechaCorte = new Date(atleta.fecha_corte);
-                            if (fechaCorte >= hoy) { activos++; } else { vencidos++; }
-                        } else { activos++; }
+                        let estadoHtml = '';
+                        let phone = atleta.phone || '-';
+                        
+                        if(atleta.fecha_corte) {
+                            const fechaCorte = new Date(atleta.fecha_corte + 'T12:00:00');
+                            const diffTime = fechaCorte - hoy;
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                            if (diffDays < 0) { 
+                                vencidos++; 
+                                estadoHtml = '<span class="status-badge badge-red" style="background: rgba(239,68,68,0.2); color: #ef4444;">VENCIDO</span>'; 
+                            } 
+                            else if (diffDays <= 5) {
+                                activos++; // Técnicamente sigue activo, pero en alerta
+                                estadoHtml = `<span class="status-badge badge-orange">VENCE EN ${diffDays} DÍAS</span>`;
+                            }
+                            else { 
+                                activos++; 
+                                estadoHtml = '<span class="status-badge badge-green">AL DÍA</span>'; 
+                            }
+                        } else {
+                            activos++;
+                            estadoHtml = '<span class="status-badge" style="background:#333;">SIN FECHA</span>';
+                        }
+
+                        // Llenar tabla del Dashboard
+                        const fechaStr = atleta.fecha_corte ? new Date(atleta.fecha_corte + 'T12:00:00').toLocaleDateString('es-ES') : 'N/A';
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>
+                                    <div class="user-col">
+                                        <div class="user-avatar">${atleta.name.substring(0, 2)}</div>
+                                        <div class="user-info">
+                                            <strong>${atleta.name}</strong>
+                                            <small>ID: ${atleta.id.substring(0,6)}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="color:var(--text-muted); font-size:0.85rem;">📱 ${phone}</td>
+                                <td>${estadoHtml}</td>
+                                <td>${fechaStr}</td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-icon pay" title="Registrar Pago" onclick="abrirModalPago('${atleta.id}', '${atleta.name.replace(/'/g, "\\'")}')">💰</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
                     });
 
-                    const elTotal = document.getElementById('kpi-total');
-                    const elActivos = document.getElementById('kpi-active');
-                    const elPendientes = document.getElementById('kpi-pending');
-
-                    if(elTotal) { elTotal.innerText = total; elTotal.classList.remove('skeleton'); }
-                    if(elActivos) { elActivos.innerText = activos; elActivos.classList.remove('skeleton'); }
-                    if(elPendientes) { elPendientes.innerText = vencidos; elPendientes.classList.remove('skeleton'); }
+                    document.getElementById('kpi-total').innerText = total;
+                    document.getElementById('kpi-active').innerText = activos;
+                    document.getElementById('kpi-pending').innerText = vencidos;
+                    
+                    document.getElementById('kpi-total').classList.remove('skeleton');
+                    document.getElementById('kpi-active').classList.remove('skeleton');
+                    document.getElementById('kpi-pending').classList.remove('skeleton');
                 }
             } catch (error) { console.error("Error al cargar métricas:", error); }
         }

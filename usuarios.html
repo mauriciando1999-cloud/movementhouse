@@ -2,117 +2,292 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Directorio de Atletas | Movement House</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Directorio de Atletas - Movement House</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
     
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js" defer></script>
 
     <style>
         :root {
-            --bg-base: #050505;
-            --bg-surface: #0a0a0a;
-            --bg-card: #121212;
-            --accent: #FF5E00;
-            --accent-soft: rgba(255, 94, 0, 0.1);
-            --text-main: #ffffff;
-            --text-muted: #94a3b8;
-            --border-color: #2d2d2d;
-            --success: #10b981;
-            --danger: #ef4444;
+            --bg-base: #000000; --bg-surface: #0a0a0a; --bg-card: #111111;
+            --accent: #FF5E00; --text-main: #ffffff; --text-muted: #888888;
+            --success: #10b981; --danger: #ef4444; --whatsapp: #25D366;
+            --border-light: rgba(255, 255, 255, 0.08); --input-bg: #1a1a1a;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Inter', sans-serif; line-height: 1.6; }
-
-        /* Estructura */
-        .page-wrapper { max-width: 1200px; margin: 0 auto; padding: 3rem 2rem; }
+        body { background-color: var(--bg-base); color: var(--text-main); font-family: 'Inter', sans-serif; padding-bottom: 5rem; }
         
-        /* Header Minimalista */
-        .header-section { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; }
-        h1 { font-family: 'Oswald', sans-serif; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 1px; }
-        .breadcrumb { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
-
-        /* Botón Maestro */
-        .btn-new { background: var(--accent); color: white; padding: 0.8rem 1.5rem; border-radius: 8px; border: none; font-family: 'Oswald', sans-serif; font-size: 0.9rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
-        .btn-new:hover { background: var(--accent-hover); transform: translateY(-2px); }
-
-        /* Tabla Estilizada */
-        .data-table { width: 100%; border-collapse: separate; border-spacing: 0 0.8rem; margin-top: 1rem; }
-        .data-table th { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; padding: 1rem; border-bottom: 1px solid var(--border-color); }
-        .data-table td { background: var(--bg-card); padding: 1.2rem 1.5rem; }
-        .data-table tr td:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
-        .data-table tr td:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+        .top-nav { position: sticky; top: 0; z-index: 100; background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-light); padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { color: var(--text-muted); text-decoration: none; font-size: 1.5rem; }
+        .nav-title { font-family: 'Oswald', sans-serif; font-size: 1.2rem; margin: 0; text-transform: uppercase; }
         
-        .avatar-cell { display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #1e1e1e; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--accent); }
+        .container { max-width: 1000px; margin: 0 auto; padding: 1.5rem 1rem; }
         
-        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-        .status-al-dia { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
-        .status-vencido { background: rgba(255, 94, 0, 0.1); color: var(--accent); border: 1px solid rgba(255, 94, 0, 0.2); }
+        .btn-add { width: 100%; background: var(--accent); color: white; border: none; padding: 1rem; border-radius: 8px; font-family: 'Oswald', sans-serif; font-size: 1.1rem; cursor: pointer; text-transform: uppercase; margin-bottom: 1.5rem; }
+        
+        .user-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 1.2rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 10px; }
+        .user-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .user-name { font-family: 'Oswald', sans-serif; font-size: 1.3rem; color: white; }
+        .user-contact { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+        
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; font-family: 'Inter', sans-serif; text-transform: uppercase; display: inline-block;}
+        .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-orange { background: rgba(255, 94, 0, 0.15); color: var(--accent); border: 1px solid rgba(255, 94, 0, 0.3); }
+        .badge-red { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
 
-        /* Modal Rediseñado */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-top: 1px solid var(--border-light); padding-top: 10px; }
+        .btn-action { background: transparent; border: 1px solid var(--border-light); color: white; padding: 0.6rem; border-radius: 6px; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; font-family: 'Oswald', sans-serif; display: flex; align-items: center; justify-content: center; gap: 5px;}
+        .btn-action.wa { border-color: var(--whatsapp); color: var(--whatsapp); background: rgba(37, 211, 102, 0.05); grid-column: span 2;}
+        .btn-action.wa:hover { background: var(--whatsapp); color: black; }
+
+        /* Modal */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: flex-end; z-index: 1000; padding: 0; }
         .modal.active { display: flex; }
-        .modal-content { background: var(--bg-card); padding: 3rem; border-radius: 16px; border: 1px solid var(--border-color); width: 100%; max-width: 450px; }
+        .modal-content { background: var(--bg-card); padding: 1.5rem; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; border-top: 1px solid var(--border-light); transform: translateY(100%); transition: 0.3s; }
+        .modal.active .modal-content { transform: translateY(0); }
         
-        input, select { width: 100%; background: var(--bg-base); border: 1px solid var(--border-color); color: white; padding: 1rem; border-radius: 8px; margin-top: 0.5rem; margin-bottom: 1.5rem; outline: none; }
-        input:focus { border-color: var(--accent); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.4rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .form-group input { width: 100%; padding: 0.9rem; border-radius: 6px; background: var(--input-bg); border: 1px solid var(--border-light); color: white; outline: none; }
+        .form-group input:focus { border-color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="page-wrapper">
-        <header class="header-section">
-            <div>
-                <div class="breadcrumb">Panel Administrativo</div>
-                <h1>Directorio de Atletas</h1>
+    <nav class="top-nav">
+        <a href="index.html" class="back-btn">←</a>
+        <h2 class="nav-title">Directorio de Atletas</h2>
+        <div style="width: 24px;"></div>
+    </nav>
+
+    <main class="container">
+        <button class="btn-add" onclick="abrirModalUsuario()">+ NUEVO ATLETA</button>
+        <div id="users-container">
+            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">Cargando directorio...</p>
+        </div>
+    </main>
+
+    <!-- Modal Usuario -->
+    <div id="modalUser" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1.5rem;">
+                <h2 id="modal-title" style="font-family: 'Oswald', sans-serif; font-size: 1.5rem;">AÑADIR ATLETA</h2>
+                <button onclick="cerrarModalUsuario()" style="background:none; border:none; color:white; font-size:1.5rem;">×</button>
             </div>
-            <button class="btn-new" onclick="window.openUserModal()">+ NUEVO ATLETA</button>
-        </header>
-
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Atleta</th>
-                    <th>Contacto</th>
-                    <th>Estado</th>
-                    <th>Próximo Pago</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="directory-tbody">
-                <tr><td colspan="5" style="text-align:center; padding: 2rem;">Cargando directorio...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div id="newUserModal" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 2rem;">Registrar Atleta</h2>
-            <form id="newUserForm" onsubmit="window.crearAtleta(event)">
-                <label>Nombre Completo</label>
-                <input type="text" id="reg-name" required>
-                <label>Email</label>
-                <input type="email" id="reg-email" required>
-                <label>Fecha de inicio</label>
-                <input type="date" id="reg-date" required>
-                <button type="submit" id="btn-submit-user" class="btn-new" style="width:100%; justify-content:center;">GUARDAR ATLETA</button>
+            
+            <form onsubmit="guardarUsuario(event)">
+                <input type="hidden" id="user-id">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="user-name" required placeholder="Ej: Carlos Pérez">
+                </div>
+                <div class="form-group">
+                    <label>Teléfono (WhatsApp)</label>
+                    <input type="tel" id="user-phone" placeholder="Ej: 04141234567">
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="user-email" placeholder="Ej: carlos@correo.com">
+                </div>
+                <div class="form-group">
+                    <label>Próxima Fecha de Corte</label>
+                    <input type="date" id="user-date" required>
+                </div>
+                <button type="submit" id="btn-save-user" class="btn-add" style="margin-top: 1rem; margin-bottom: 0;">GUARDAR ATLETA</button>
             </form>
         </div>
     </div>
 
-    <div id="modalPago" class="modal">
-        <div class="modal-content">
-            <h2 style="margin-bottom: 1rem;">Registrar Pago</h2>
-            <p id="payment-user-name" style="color: var(--text-muted); margin-bottom: 2rem;"></p>
-            <form onsubmit="procesarPagoAdmin(event)">
-                <button type="submit" id="btn-confirm-payment" class="btn-new" style="width:100%; justify-content:center; background: var(--success);">CONFIRMAR PAGO</button>
-            </form>
-        </div>
-    </div>
+    <script>
+        let dbClient;
+        let perfilesGlobales = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            dbClient = window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
+            await cargarUsuarios();
+        });
+
+        async function cargarUsuarios() {
+            const container = document.getElementById('users-container');
+            try {
+                const { data, error } = await dbClient.from('profiles').select('*').order('name');
+                if (error) throw error;
+                
+                perfilesGlobales = data;
+                container.innerHTML = '';
+                
+                const hoy = new Date();
+                hoy.setHours(0,0,0,0);
+
+                data.forEach(user => {
+                    const phone = user.phone || 'Sin teléfono';
+                    const email = user.email || 'Sin correo';
+                    
+                    // LÓGICA DE DÍAS Y ALERTAS
+                    let estadoHtml = '';
+                    let diffDays = 999;
+                    
+                    if(user.fecha_corte) {
+                        const fechaCorte = new Date(user.fecha_corte + 'T12:00:00'); // Evita problemas de zona horaria
+                        const diffTime = fechaCorte - hoy;
+                        diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (diffDays < 0) {
+                            estadoHtml = '<span class="badge badge-red">VENCIDO</span>';
+                        } else if (diffDays <= 5) {
+                            estadoHtml = `<span class="badge badge-orange">VENCE EN ${diffDays} DÍAS</span>`;
+                        } else {
+                            estadoHtml = '<span class="badge badge-green">AL DÍA</span>';
+                        }
+                    } else {
+                        estadoHtml = '<span class="badge badge-orange">SIN FECHA</span>';
+                    }
+
+                    // Formatear fecha para mostrar
+                    const fechaStr = user.fecha_corte ? new Date(user.fecha_corte + 'T12:00:00').toLocaleDateString('es-ES') : 'No asignada';
+
+                    container.innerHTML += `
+                        <div class="user-card">
+                            <div class="user-header">
+                                <div>
+                                    <h3 class="user-name">${user.name}</h3>
+                                    <div class="user-contact">📱 ${phone}<br>✉️ ${email}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    ${estadoHtml}<br>
+                                    <small style="color:var(--text-muted); font-size:0.75rem;">${fechaStr}</small>
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-action" onclick="abrirModalUsuario('${user.id}')">✏️ Editar</button>
+                                <button class="btn-action" style="color:var(--danger); border-color:rgba(239,68,68,0.3);" onclick="eliminarUsuario('${user.id}', '${user.name}')">🗑 Borrar</button>
+                                <button class="btn-action wa" onclick="enviarCobroWA('${user.id}', ${diffDays})">💬 ENVIAR RECORDATORIO (WA)</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if(data.length === 0) container.innerHTML = '<p style="text-align:center; color:gray;">No hay atletas registrados.</p>';
+
+            } catch (e) {
+                container.innerHTML = '<p style="color:red; text-align:center;">Error al cargar datos.</p>';
+            }
+        }
+
+        // ==========================================
+        // MOTOR AUTOMÁTICO DE WHATSAPP
+        // ==========================================
+        function enviarCobroWA(id, diasRestantes) {
+            const user = perfilesGlobales.find(p => p.id === id);
+            if (!user || !user.phone) return alert("Este atleta no tiene un número de teléfono guardado.");
+
+            let phone = user.phone.replace(/\D/g, '');
+            if (phone.startsWith('0')) phone = '58' + phone.substring(1); // Ajusta para Venezuela
+
+            const firstName = user.name.split(' ')[0];
+            const fechaFormateada = user.fecha_corte ? new Date(user.fecha_corte + 'T12:00:00').toLocaleDateString('es-ES') : '';
+            
+            let mensaje = '';
+            
+            // INTELIGENCIA: El mensaje cambia dependiendo de qué tan cerca está el corte
+            if (diasRestantes < 0) {
+                mensaje = `¡Hola ${firstName}! 💪 Te escribimos de Movement House. Tu ciclo de entrenamiento venció el ${fechaFormateada}. Para no pausar tu planificación en la App, por favor envíanos tu comprobante de pago por aquí. ¡Seguimos sumando!`;
+            } else if (diasRestantes <= 5) {
+                mensaje = `¡Hola ${firstName}! 💪 Te recordamos desde Movement House que tu plan de entrenamiento se renueva en ${diasRestantes} días (el ${fechaFormateada}). Te dejamos el recordatorio para procesar tu pago y mantener tus rutinas activas sin interrupción.`;
+            } else {
+                mensaje = `¡Hola ${firstName}! 💪 Te contactamos de Movement House. Tu próxima fecha de corte es el ${fechaFormateada}. ¡Dale con todo a los entrenamientos!`;
+            }
+
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`, '_blank');
+        }
+
+        // ==========================================
+        // GUARDAR / EDITAR
+        // ==========================================
+        function abrirModalUsuario(id = null) {
+            document.getElementById('modalUser').classList.add('active');
+            const btn = document.getElementById('btn-save-user');
+            
+            if (id) {
+                const user = perfilesGlobales.find(p => p.id === id);
+                document.getElementById('modal-title').innerText = 'EDITAR ATLETA';
+                document.getElementById('user-id').value = user.id;
+                document.getElementById('user-name').value = user.name;
+                document.getElementById('user-phone').value = user.phone || '';
+                document.getElementById('user-email').value = user.email || '';
+                document.getElementById('user-date').value = user.fecha_corte || '';
+                btn.innerText = 'ACTUALIZAR DATOS';
+            } else {
+                document.getElementById('modal-title').innerText = 'AÑADIR ATLETA';
+                document.getElementById('user-id').value = '';
+                document.getElementById('user-name').value = '';
+                document.getElementById('user-phone').value = '';
+                document.getElementById('user-email').value = '';
+                document.getElementById('user-date').value = '';
+                btn.innerText = 'GUARDAR ATLETA';
+            }
+        }
+
+        function cerrarModalUsuario() {
+            document.getElementById('modalUser').classList.remove('active');
+        }
+
+        async function guardarUsuario(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-user');
+            btn.disabled = true; btn.innerText = 'Procesando...';
+
+            const idActual = document.getElementById('user-id').value;
+            
+            // 1. Preparamos los datos del formulario
+            const payload = {
+                name: document.getElementById('user-name').value.trim(),
+                phone: document.getElementById('user-phone').value.trim(),
+                email: document.getElementById('user-email').value.trim(),
+                fecha_corte: document.getElementById('user-date').value
+            };
+
+            try {
+                let errorSupabase;
+
+                if (idActual) {
+                    // MODO EDICIÓN: Actualizamos el atleta existente
+                    const { error } = await dbClient.from('profiles').update(payload).eq('id', idActual);
+                    errorSupabase = error;
+                } else {
+                    // MODO NUEVO: Generamos un ID único estilo "ATH-XXXX"
+                    const randomHex = Math.floor(Math.random()*16777215).toString(16).toUpperCase().substring(0,4).padStart(4, '0');
+                    payload.id = `ATH-${randomHex}`; 
+                    
+                    // Insertamos el nuevo atleta
+                    const { error } = await dbClient.from('profiles').insert([payload]);
+                    errorSupabase = error;
+                }
+
+                // Si Supabase devuelve un error, detenemos todo y lo mostramos
+                if (errorSupabase) throw errorSupabase;
+
+                // Si todo sale bien, cerramos y recargamos
+                cerrarModalUsuario();
+                await cargarUsuarios();
+                
+            } catch (err) {
+                console.error("Error de Supabase:", err);
+                alert("Hubo un error al guardar: " + (err.message || "Revisa si creaste las columnas phone y email en Supabase"));
+            } finally {
+                btn.disabled = false;
+                btn.innerText = idActual ? 'ACTUALIZAR DATOS' : 'GUARDAR ATLETA';
+            }
+        }
+
+        async function eliminarUsuario(id, name) {
+            if(!confirm(`¿Borrar a ${name} permanentemente?`)) return;
+            await dbClient.from('profiles').delete().eq('id', id);
+            await cargarUsuarios();
+        }
+    </script>
 </body>
 </html>
