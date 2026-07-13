@@ -242,7 +242,6 @@
 
             const idActual = document.getElementById('user-id').value;
             
-            // 1. Preparamos los datos del formulario
             const payload = {
                 name: document.getElementById('user-name').value.trim(),
                 phone: document.getElementById('user-phone').value.trim(),
@@ -254,29 +253,25 @@
                 let errorSupabase;
 
                 if (idActual) {
-                    // MODO EDICIÓN: Actualizamos el atleta existente
+                    // MODO EDICIÓN
                     const { error } = await dbClient.from('profiles').update(payload).eq('id', idActual);
                     errorSupabase = error;
                 } else {
-                    // MODO NUEVO: Generamos un ID único estilo "ATH-XXXX"
-                    const randomHex = Math.floor(Math.random()*16777215).toString(16).toUpperCase().substring(0,4).padStart(4, '0');
-                    payload.id = `ATH-${randomHex}`; 
+                    // MODO NUEVO: Generamos un UUID real usando la herramienta nativa del navegador
+                    payload.id = crypto.randomUUID(); 
                     
-                    // Insertamos el nuevo atleta
                     const { error } = await dbClient.from('profiles').insert([payload]);
                     errorSupabase = error;
                 }
 
-                // Si Supabase devuelve un error, detenemos todo y lo mostramos
                 if (errorSupabase) throw errorSupabase;
 
-                // Si todo sale bien, cerramos y recargamos
                 cerrarModalUsuario();
                 await cargarUsuarios();
                 
             } catch (err) {
                 console.error("Error de Supabase:", err);
-                alert("Hubo un error al guardar: " + (err.message || "Revisa si creaste las columnas phone y email en Supabase"));
+                alert("Hubo un error al guardar: " + (err.message || "Revisa la base de datos"));
             } finally {
                 btn.disabled = false;
                 btn.innerText = idActual ? 'ACTUALIZAR DATOS' : 'GUARDAR ATLETA';

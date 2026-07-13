@@ -288,49 +288,115 @@ window.eliminarAtleta = async function(id, nombre) {
 };
 
 // ---- Lógica de Pagos del Admin ----
+window.usuarioSeleccionadoParaPagoId = null;
+
 window.abrirModalPago = function(id, nombre) {
-    currentPaymentUserId = id;
+    window.usuarioSeleccionadoParaPagoId = id; // ¡Esta es la línea clave que faltaba!
     document.getElementById('payment-user-name').innerText = nombre;
     document.getElementById('modalPago').classList.add('active');
 }
 
 window.cerrarModalPago = function() {
-    currentPaymentUserId = null;
+    window.usuarioSeleccionadoParaPagoId = null; // Limpiamos la memoria
+    document.getElementById('modalPago').classList.remove('active');
+}
+// Variable global para recordar a quién le estamos cobrando
+window.usuarioSeleccionadoParaPagoId = null;
+
+window.abrirModalPago = function(id, nombre) {
+    window.usuarioSeleccionadoParaPagoId = id;
+    document.getElementById('payment-user-name').innerText = nombre;
+    document.getElementById('modalPago').classList.add('active');
+}
+
+window.cerrarModalPago = function() {
+    window.usuarioSeleccionadoParaPagoId = null;
     document.getElementById('modalPago').classList.remove('active');
 }
 
-window.procesarPagoAdmin = async function(e) {
-    e.preventDefault();
-    if (!dbClient || !currentPaymentUserId) return;
-
+async function procesarPagoAdmin(event) {
+    event.preventDefault();
+    
     const btn = document.getElementById('btn-confirm-payment');
-    btn.innerText = 'PROCESANDO...'; btn.disabled = true;
+    btn.innerText = "PROCESANDO...";
+    btn.disabled = true;
+
+    const userId = window.usuarioSeleccionadoParaPagoId; 
+    
+    if (!userId) {
+        alert("Error crítico: No se detectó el ID del atleta.");
+        btn.innerText = "CONFIRMAR PAGO";
+        btn.disabled = false;
+        return;
+    }
+
+    const metodoPago = document.getElementById('payment-method').value;
 
     try {
-        // Lógica de Renovación: Suma exactamente 1 mes desde el día en que se procesa el pago.
+        // INICIALIZAMOS LA CONEXIÓN A SUPABASE AQUÍ MISMO PARA EVITAR EL ERROR
+        const db = window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
+
+        // 1. Buscamos al usuario usando la variable 'db' que acabamos de crear
+        const { data: usuario, error: errorBusqueda } = await db
+            .from('profiles')
+            .select('fecha_corte')
+            .eq('id', userId)
+            .single();
+
+        if (errorBusqueda) throw errorBusqueda;
+
+        // 2. MATEMÁTICA INTELIGENTE DE FECHAS
         const hoy = new Date();
-        const proximoMes = new Date(hoy.setMonth(hoy.getMonth() + 1));
-        const nuevaFecha = proximoMes.toISOString().split('T')[0];
+        hoy.setHours(0, 0, 0, 0); 
+        
+        let nuevaFechaCorte = new Date();
 
-        const { error } = await dbClient.from('profiles').update({
-            payment_status: 'al_dia',
-            next_billing_date: nuevaFecha
-        }).eq('id', currentPaymentUserId);
+        if (usuario.fecha_corte) {
+            const fechaBase = new Date(usuario.fecha_corte + 'T12:00:00');
+            
+            if (fechaBase >= hoy) {
+                // Al día: Sumamos 1 mes a su fecha de corte actual
+                nuevaFechaCorte = new Date(fechaBase);
+                nuevaFechaCorte.setMonth(nuevaFechaCorte.getMonth() + 1);
+            } else {
+                // Vencido: Sumamos 1 mes a partir de HOY
+                nuevaFechaCorte = new Date(hoy);
+                nuevaFechaCorte.setMonth(nuevaFechaCorte.getMonth() + 1);
+            }
+        } else {
+            // Nuevo/Sin fecha
+            nuevaFechaCorte = new Date(hoy);
+            nuevaFechaCorte.setMonth(nuevaFechaCorte.getMonth() + 1);
+        }
 
-        if (error) throw error;
+        const fechaFormateada = nuevaFechaCorte.toISOString().split('T')[0];
 
-        window.cerrarModalPago();
-        cargarDirectorio();
+        // 3. Actualizamos el perfil en Supabase
+        const { error: errorUpdate } = await db
+            .from('profiles')
+            .update({ fecha_corte: fechaFormateada })
+            .eq('id', userId);
+
+        if (errorUpdate) throw errorUpdate;
+
+        // 4. Éxito
+        btn.style.background = "var(--success)";
+        btn.innerText = "¡PAGO REGISTRADO!";
+        
+        setTimeout(() => {
+            cerrarModalPago();
+            // ESTA ES LA LÍNEA MÁGICA QUE RECARGA LA PANTALLA
+            window.location.reload(); 
+        }, 1200);
 
     } catch (error) {
-        console.error("Error registrando pago:", error);
-        alert("Fallo al actualizar la base de datos.");
-    } finally {
-        btn.innerText = 'CONFIRMAR PAGO'; btn.disabled = false;
+        console.error("Error al procesar el pago:", error);
+        alert("Hubo un error al registrar el pago.");
+        btn.style.background = "";
+        btn.innerText = "CONFIRMAR PAGO";
+        btn.disabled = false;
     }
 }
-
-
 /* ========================================================
    4. PORTAL DE PAGOS BCV Y WHATSAPP (portal-pagos.html)
    ======================================================== */
