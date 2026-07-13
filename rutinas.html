@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Crear Rutina - Movement House</title>
+    <title>Crear/Editar Rutina - Movement House</title>
     
     <meta name="theme-color" content="#000000">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap" rel="stylesheet">
@@ -74,8 +74,8 @@
 
     <!-- CABECERA FLOTANTE -->
     <nav class="top-nav">
-        <a href="index.html" class="back-btn">←</a>
-        <h2 class="nav-title">Nueva Planificación</h2>
+        <a href="planificacion.html" class="back-btn">←</a>
+        <h2 class="nav-title" id="nav-title-text">Nueva Planificación</h2>
         <button class="btn-save" onclick="guardarRutina()" id="btn-submit">
             ✔ Guardar
         </button>
@@ -100,7 +100,7 @@
 
         <!-- CONTENEDOR DE DÍAS -->
         <div id="blocks-container">
-            <!-- El día 1 se carga por defecto -->
+            <!-- Los bloques se inyectan mediante JavaScript -->
         </div>
 
         <button class="btn-add-block" onclick="agregarBloque()">
@@ -112,12 +112,24 @@
     <script>
         let dbClient;
         let bloqueContador = 0;
+        let modoEdicionId = null; // Variable global para saber si estamos editando
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (typeof window.MH_CONFIG !== 'undefined') {
                 dbClient = window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
+                
                 await cargarAtletas();
-                agregarBloque(); // Agregar el primer día vacío automáticamente
+
+                // LÓGICA DE EDICIÓN: Leer la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                modoEdicionId = urlParams.get('edit');
+
+                if (modoEdicionId) {
+                    document.getElementById('nav-title-text').innerText = "Editar Planificación";
+                    await cargarRutinaParaEditar(modoEdicionId);
+                } else {
+                    agregarBloque(); // Si es nueva, agregamos un día vacío por defecto
+                }
             }
         });
 
@@ -136,9 +148,9 @@
         }
 
         // ==========================================
-        // CREADOR DE DÍAS Y EJERCICIOS (DOM)
+        // CREADOR DE DÍAS Y EJERCICIOS (Soporta inyección de datos)
         // ==========================================
-        function agregarBloque() {
+        function agregarBloque(datosBloque = null) {
             bloqueContador++;
             const blockId = `block-${bloqueContador}`;
             
@@ -162,10 +174,22 @@
             `;
             
             document.getElementById('blocks-container').insertAdjacentHTML('beforeend', html);
-            agregarEjercicio(blockId); // Agrega un ejercicio vacío por defecto al crear el día
+
+            // Si estamos editando y recibimos datos, rellenamos el bloque
+            if (datosBloque) {
+                const blockEl = document.getElementById(blockId);
+                blockEl.querySelector('.block-name').value = datosBloque.day || '';
+                blockEl.querySelector('.block-warmup').value = datosBloque.warmup || '';
+                
+                datosBloque.exercises.forEach(ex => {
+                    agregarEjercicio(blockId, ex);
+                });
+            } else {
+                agregarEjercicio(blockId); // Si es nuevo, añade un ejercicio vacío
+            }
         }
 
-        function agregarEjercicio(blockId) {
+        function agregarEjercicio(blockId, datosEx = null) {
             const exId = `ex-${Math.random().toString(36).substr(2, 9)}`;
             
             const html = `
@@ -196,6 +220,17 @@
             `;
             
             document.getElementById(`ex-list-${blockId}`).insertAdjacentHTML('beforeend', html);
+
+            // Si recibimos datos (Modo Edición), rellenamos los inputs
+            if (datosEx) {
+                const exEl = document.getElementById(exId);
+                exEl.querySelector('.ex-name').value = datosEx.exercise || '';
+                exEl.querySelector('.ex-reps').value = datosEx.reps || '';
+                exEl.querySelector('.ex-intensity').value = datosEx.intensity || '';
+                exEl.querySelector('.ex-rest').value = datosEx.rest || '';
+                exEl.querySelector('.ex-video').value = datosEx.video || '';
+                exEl.querySelector('.ex-notes').value = datosEx.notes || '';
+            }
         }
 
         function eliminarElemento(id) {
@@ -203,7 +238,33 @@
         }
 
         // ==========================================
-        // PROCESAMIENTO Y GUARDADO (SUPABASE)
+        // CARGAR RUTINA PARA EDITAR
+        // ==========================================
+        async function cargarRutinaParaEditar(id) {
+            try {
+                const { data, error } = await dbClient.from('routines').select('*').eq('id', id).single();
+                if (error) throw error;
+
+                document.getElementById('rutina-nombre').value = data.name;
+                document.getElementById('rutina-asignado').value = data.assigned_to;
+                
+                // Rellenar bloques y ejercicios
+                if (data.blocks && data.blocks.length > 0) {
+                    data.blocks.forEach(bloque => {
+                        agregarBloque(bloque);
+                    });
+                } else {
+                    agregarBloque();
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Error al cargar la rutina. Es posible que haya sido eliminada.");
+            }
+        }
+
+        // ==========================================
+        // PROCESAMIENTO Y GUARDADO (INSERTAR O ACTUALIZAR)
         // ==========================================
         async function guardarRutina() {
             const btnSubmit = document.getElementById('btn-submit');
@@ -214,7 +275,6 @@
                 return alert("Por favor, ponle un nombre a la rutina.");
             }
 
-            // Recopilar datos leyendo el HTML
             const bloquesElements = document.querySelectorAll('.day-block');
             const bloquesEstructurados = [];
 
@@ -256,29 +316,39 @@
                 });
             }
 
-            // Iniciar proceso de guardado
+            const payload = {
+                name: nombreRutina,
+                assigned_to: asignadoA,
+                blocks: bloquesEstructurados
+            };
+
             btnSubmit.innerText = "⏳ Guardando...";
             btnSubmit.disabled = true;
 
             try {
-                const { error } = await dbClient.from('routines').insert([{
-                    name: nombreRutina,
-                    assigned_to: asignadoA,
-                    blocks: bloquesEstructurados
-                }]);
+                let error;
+                if (modoEdicionId) {
+                    // MODO ACTUALIZAR
+                    const response = await dbClient.from('routines').update(payload).eq('id', modoEdicionId);
+                    error = response.error;
+                } else {
+                    // MODO NUEVO
+                    const response = await dbClient.from('routines').insert([payload]);
+                    error = response.error;
+                }
 
                 if (error) throw error;
 
                 btnSubmit.style.background = "var(--success)";
-                btnSubmit.innerText = "✔ ¡RUTINA CREADA!";
+                btnSubmit.innerText = "✔ ¡GUARDADO!";
                 
                 setTimeout(() => {
-                    window.location.href = "index.html"; // Volver al panel admin
-                }, 1500);
+                    window.location.href = "planificacion.html"; 
+                }, 1000);
 
-            } catch (error) {
-                console.error(error);
-                alert("Error al guardar la rutina.");
+            } catch (err) {
+                console.error(err);
+                alert("Error al guardar la rutina en la base de datos.");
                 btnSubmit.style.background = "var(--accent)";
                 btnSubmit.innerText = "✔ Guardar";
                 btnSubmit.disabled = false;
