@@ -16,7 +16,9 @@
     
     <script src="config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="app.js" defer></script>
+    
+    <!-- FIX DE CACHÉ: v=3 obliga al navegador a descargar la última versión de app.js -->
+    <script src="app.js?v=3" defer></script>
 
     <style>
         :root {
@@ -56,19 +58,12 @@
         .btn-primary { background: var(--accent); }
         .btn-outline { background: transparent; border: 1px solid var(--border-light); color: var(--text-main); }
 
-        /* ARREGLO DE LA TABLA Y EL SCROLL HORIZONTAL */
-        .admin-table-section { padding: 1.5rem; min-width: 0; /* Crucial para que no rompa el grid */ }
+        .admin-table-section { padding: 1.5rem; min-width: 0; }
         .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .table-header h2 { font-size: 1.4rem; margin: 0; }
         .view-all-link { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; font-family: 'Inter', sans-serif;}
         
-        .table-responsive { 
-            width: 100%; 
-            overflow-x: auto; 
-            min-height: 200px; 
-            -webkit-overflow-scrolling: touch; /* Scroll suave en iOS/Móviles */
-        }
-        /* Estilo sutil para la barra de desplazamiento */
+        .table-responsive { width: 100%; overflow-x: auto; min-height: 200px; -webkit-overflow-scrolling: touch; }
         .table-responsive::-webkit-scrollbar { height: 6px; }
         .table-responsive::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
         .table-responsive::-webkit-scrollbar-thumb:hover { background: rgba(255, 94, 0, 0.5); }
@@ -77,7 +72,6 @@
         .admin-table th { padding: 1rem 1.5rem; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid var(--border-light); background: rgba(0,0,0,0.3); white-space: nowrap; }
         .admin-table td { padding: 1.2rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; white-space: nowrap; }
 
-        /* Estilos inyectados por app.js */
         .user-avatar { width: 42px; height: 42px; min-width: 42px; border-radius: 50%; background: var(--input-bg); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; margin-right: 15px; font-family: 'Oswald', sans-serif;}
         .user-col { display: flex; align-items: center; min-width: 200px;}
         .user-info strong { display: block; font-size: 1rem; color: white; margin-bottom: 2px;}
@@ -86,17 +80,18 @@
         .status-badge { padding: 0.35rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block;}
         .badge-green { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
         .badge-orange { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(255, 94, 0, 0.2); }
+        .badge-red { background: rgba(239,68,68,0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
         .action-btns { display: flex; gap: 8px; }
-        .btn-icon { background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); width: 34px; height: 34px; min-width: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .btn-icon { background: transparent; border: 1px solid var(--border-light); color: var(--text-muted); width: 34px; height: 34px; min-width: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
+        .btn-icon:hover { background: rgba(255,255,255,0.1); color: white; }
 
-        /* MODAL */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 100; opacity: 0; transition: opacity 0.3s; padding: 1rem;}
         .modal.active { display: flex; opacity: 1; }
         .modal-content { background: var(--bg-card); padding: 2.5rem; width: 100%; max-width: 550px; border: 1px solid var(--border-light); border-radius: 12px; position: relative; transform: translateY(20px); transition: 0.3s; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
         .modal.active .modal-content { transform: translateY(0); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .btn-close { background: none; border: none; color: var(--text-muted); font-size: 2rem; line-height: 1; }
+        .btn-close { background: none; border: none; color: var(--text-muted); font-size: 2rem; line-height: 1; cursor: pointer; }
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-muted); font-size: 0.85rem; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; text-transform: uppercase; }
         .form-group input, .form-group select { width: 100%; padding: 0.8rem; border-radius: 6px; background: var(--input-bg); border: 1px solid var(--border-light); color: white; font-family: 'Inter', sans-serif; }
@@ -106,12 +101,9 @@
 
         #install-banner { display: none; background: var(--accent); color: white; padding: 1.2rem; text-align: center; font-weight: 600; font-size: 0.95rem; position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Oswald', sans-serif;}
 
-        /* COMPONENTE: MENÚ RADIAL MÓVIL */
         .radial-menu-wrapper { display: none; position: fixed; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 1000; width: 70px; height: 70px; }
-        
         .radial-center { width: 70px; height: 70px; background: var(--bg-card); border: 2px solid var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Oswald', sans-serif; font-size: 1.5rem; font-style: italic; color: white; box-shadow: 0 0 0 0 rgba(255, 94, 0, 0.4); position: relative; z-index: 10; user-select: none; -webkit-user-select: none; touch-action: none; animation: pulseRadial 2s infinite; }
         @keyframes pulseRadial { 0% { box-shadow: 0 0 0 0 rgba(255, 94, 0, 0.4); } 70% { box-shadow: 0 0 0 15px rgba(255, 94, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 94, 0, 0); } }
-        
         .radial-label { position: absolute; top: -130px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); border: 1px solid var(--accent); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; white-space: nowrap; opacity: 0; transition: opacity 0.2s; pointer-events: none; font-family: 'Oswald', sans-serif; letter-spacing: 1px; text-transform: uppercase; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .radial-menu-wrapper.active .radial-label { opacity: 1; }
 
@@ -124,7 +116,6 @@
         #rb-2 { --tx: 50px; --ty: -85px; }  
         #rb-3 { --tx: 90px; --ty: -20px; }  
 
-        /* OPTIMIZACIÓN EXTREMA PARA TELÉFONOS */
         @media (max-width: 768px) {
             .admin-header { padding: 1rem; margin-bottom: 1.5rem; }
             .brand-logo { font-size: 1.2rem; }
@@ -138,18 +129,12 @@
             
             .admin-actions { display: none; }
             .radial-menu-wrapper { display: block; }
-
-            /* Ajustes de Tabla para Móviles */
             .admin-table-section { padding: 1rem; border-radius: 12px; width: 100%; min-width: 0;}
             .table-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 1rem; }
             .table-header h2 { font-size: 1.2rem; }
-            
-            /* El scroll funciona fluido dentro de este contenedor */
             .table-responsive { border-radius: 8px; border: 1px solid var(--border-light); padding-bottom: 0.5rem; width: 100%; overflow-x: auto; }
-            
             .admin-table th { padding: 0.8rem 1rem; font-size: 0.75rem; }
             .admin-table td { padding: 1rem; font-size: 0.9rem; } 
-            
             .modal { align-items: flex-end; padding: 0; background: rgba(0, 0, 0, 0.9); }
             .modal-content { border-radius: 20px 20px 0 0; padding: 1.5rem; border: none; border-top: 1px solid var(--border-light); transform: translateY(100%); }
         }
@@ -302,7 +287,9 @@
 
         async function cargarMetricas() {
             if (typeof window.MH_CONFIG === 'undefined') return;
-            const db = window.dbClient || window._sb || window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
+            
+            // Declaración robusta de la base de datos dentro de la función
+            const db = window.supabase.createClient(window.MH_CONFIG.SUPABASE_URL, window.MH_CONFIG.SUPABASE_ANON_KEY);
 
             try {
                 const { data, error } = await db.from('profiles').select('*').order('fecha_corte', { ascending: true });
@@ -331,10 +318,10 @@
 
                             if (diffDays < 0) { 
                                 vencidos++; 
-                                estadoHtml = '<span class="status-badge badge-red" style="background: rgba(239,68,68,0.2); color: #ef4444;">VENCIDO</span>'; 
+                                estadoHtml = '<span class="status-badge badge-red">VENCIDO</span>'; 
                             } 
                             else if (diffDays <= 5) {
-                                activos++; // Técnicamente sigue activo, pero en alerta
+                                activos++; 
                                 estadoHtml = `<span class="status-badge badge-orange">VENCE EN ${diffDays} DÍAS</span>`;
                             }
                             else { 
@@ -346,14 +333,16 @@
                             estadoHtml = '<span class="status-badge" style="background:#333;">SIN FECHA</span>';
                         }
 
-                        // Llenar tabla del Dashboard
-                        const fechaStr = atleta.fecha_corte ? new Date(atleta.fecha_corte + 'T12:00:00').toLocaleDateString('es-ES') : 'N/A';
+                        // Formato de fecha con los ceros correctos (ej: 13/08/2026)
+                        const fechaStr = atleta.fecha_corte 
+                            ? new Date(atleta.fecha_corte + 'T12:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
+                            : 'N/A';
                         
                         tbody.innerHTML += `
                             <tr>
                                 <td>
                                     <div class="user-col">
-                                        <div class="user-avatar">${atleta.name.substring(0, 2)}</div>
+                                        <div class="user-avatar">${atleta.name.substring(0, 2).toUpperCase()}</div>
                                         <div class="user-info">
                                             <strong>${atleta.name}</strong>
                                             <small>ID: ${atleta.id.substring(0,6)}</small>
